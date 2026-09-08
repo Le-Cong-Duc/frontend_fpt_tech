@@ -17,7 +17,7 @@ const Access = (props: IProps) => {
 
     useEffect(() => {
         const check = permissions.find(item =>
-            (item.path ?? item.path) === permission.path
+            item.path === permission.path
             && item.method === permission.method
             && item.module === permission.module
         );
