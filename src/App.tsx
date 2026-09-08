@@ -16,6 +16,12 @@ import RolePage from './pages/admin/role';
 import UserPage from './pages/admin/user';
 import { fetchAccount } from './redux/slice/accountSlide';
 import LayoutApp from './components/share/layout.app';
+import CoursePage from './pages/admin/course';
+import ClassroomPage from './pages/admin/classroom';
+import EnrollmentPage from './pages/admin/enrollment';
+import InvoicePage from './pages/admin/invoice';
+import PaymentPage from './pages/admin/payment';
+import LeadPage from './pages/admin/lead';
 
 const BackendModulePage = ({ title, endpoint }: { title: string; endpoint: string }) => (
     <div style={{ padding: 24 }}>
@@ -73,12 +79,12 @@ export default function App() {
                 { path: 'users', element: <ProtectedModuleRoute><UserPage /></ProtectedModuleRoute> },
                 { path: 'roles', element: <ProtectedModuleRoute><RolePage /></ProtectedModuleRoute> },
                 { path: 'permissions', element: <ProtectedModuleRoute><PermissionPage /></ProtectedModuleRoute> },
-                { path: 'courses', element: <ProtectedModuleRoute><BackendModulePage title="Courses" endpoint="/courses" /></ProtectedModuleRoute> },
-                { path: 'classrooms', element: <ProtectedModuleRoute><BackendModulePage title="Classrooms" endpoint="/classrooms" /></ProtectedModuleRoute> },
-                { path: 'enrollments', element: <ProtectedModuleRoute><BackendModulePage title="Enrollments" endpoint="/enrollments" /></ProtectedModuleRoute> },
-                { path: 'invoices', element: <ProtectedModuleRoute><BackendModulePage title="Invoices" endpoint="/invoices" /></ProtectedModuleRoute> },
-                { path: 'payments', element: <ProtectedModuleRoute><BackendModulePage title="Payments" endpoint="/payments" /></ProtectedModuleRoute> },
-                { path: 'leads', element: <ProtectedModuleRoute><BackendModulePage title="Leads" endpoint="/leads" /></ProtectedModuleRoute> },
+                { path: 'courses', element: <ProtectedModuleRoute><CoursePage /></ProtectedModuleRoute> },
+                { path: 'classrooms', element: <ProtectedModuleRoute><ClassroomPage /></ProtectedModuleRoute> },
+                { path: 'enrollments', element: <ProtectedModuleRoute><EnrollmentPage /></ProtectedModuleRoute> },
+                { path: 'invoices', element: <ProtectedModuleRoute><InvoicePage /></ProtectedModuleRoute> },
+                { path: 'payments', element: <ProtectedModuleRoute><PaymentPage /></ProtectedModuleRoute> },
+                { path: 'leads', element: <ProtectedModuleRoute><LeadPage /></ProtectedModuleRoute> },
                 { path: 'conversations', element: <ProtectedModuleRoute><BackendModulePage title="Conversations" endpoint="/conversations" /></ProtectedModuleRoute> },
                 { path: 'messages', element: <ProtectedModuleRoute><BackendModulePage title="Messages" endpoint="/messages" /></ProtectedModuleRoute> },
                 { path: 'notifications', element: <ProtectedModuleRoute><BackendModulePage title="Notifications" endpoint="/notifications" /></ProtectedModuleRoute> },

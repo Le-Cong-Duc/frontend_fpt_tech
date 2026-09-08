@@ -25,7 +25,10 @@ type Resource = IClassroom | IConversation | ICourse | IEnrollment | IInvoice | 
 const list = <T>(resource: string, query = '') => axios.get<IBackendRes<IModelPaginate<T>>>(`${API_PREFIX}/${resource}${query ? `?${query}` : ''}`);
 const findById = <T>(resource: string, id: string) => axios.get<IBackendRes<T>>(`${API_PREFIX}/${resource}/${id}`);
 const create = <T extends Resource>(resource: string, payload: Omit<T, '_id'>) => axios.post<IBackendRes<T>>(`${API_PREFIX}/${resource}`, payload);
-const update = <T extends Resource>(resource: string, id: string, payload: Partial<T>) => axios.patch<IBackendRes<T>>(`${API_PREFIX}/${resource}/${id}`, payload);
+const update = <T extends Resource>(resource: string, id: string, payload: Partial<T>) => axios.patch<IBackendRes<T>>(
+    `${API_PREFIX}/${resource}/${id}`,
+    { ...payload, _id: id }
+);
 const remove = <T extends Resource>(resource: string, id: string) => axios.delete<IBackendRes<T>>(`${API_PREFIX}/${resource}/${id}`);
 
 export const callRegister = (name: string, email: string, password: string, age: number, gender: string, address: string) => axios.post<IBackendRes<IUser>>(`${API_PREFIX}/auth/register`, { name, email, password, age, gender, address });
