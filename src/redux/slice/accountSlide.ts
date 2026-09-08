@@ -27,7 +27,7 @@ interface IState {
             _id: string;
             name: string;
             path: string;
-            apiPath?: string;
+            path?: string;
             method: string;
             module: string;
         }[]

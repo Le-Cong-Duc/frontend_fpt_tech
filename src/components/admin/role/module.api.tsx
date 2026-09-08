@@ -88,7 +88,7 @@ const ModuleApi = (props: IProps) => {
                             <p style={{ paddingLeft: 10, marginBottom: 3 }}>{value?.name || ''}</p>
                             <div style={{ display: 'flex' }}>
                               <p style={{ paddingLeft: 10, fontWeight: 'bold', marginBottom: 0, color: colorMethod(value?.method as string) }}>{value?.method || ''}</p>
-                              <p style={{ paddingLeft: 10, marginBottom: 0, color: grey[5] }}>{value?.apiPath || ''}</p>
+                              <p style={{ paddingLeft: 10, marginBottom: 0, color: grey[5] }}>{value?.path || ''}</p>
                             </div>
                           </Tooltip>
                         </div>

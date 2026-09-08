@@ -70,7 +70,7 @@ const PermissionPage = () => {
         },
         {
             title: 'API',
-            dataIndex: 'apiPath',
+            dataIndex: 'path',
             sorter: true,
         },
         {
@@ -166,7 +166,7 @@ const PermissionPage = () => {
     const buildQuery = (params: any, sort: any, filter: any) => {
         const clone = { ...params };
         if (clone.name) clone.name = `/${clone.name}/i`;
-        if (clone.apiPath) clone.apiPath = `/${clone.apiPath}/i`;
+        if (clone.path) clone.path = `/${clone.path}/i`;
         if (clone.method) clone.method = `/${clone.method}/i`;
         if (clone.module) clone.module = `/${clone.module}/i`;
 
@@ -177,8 +177,8 @@ const PermissionPage = () => {
         if (sort && sort.name) {
             sortBy = sort.name === 'ascend' ? "sort=name" : "sort=-name";
         }
-        if (sort && sort.apiPath) {
-            sortBy = sort.apiPath === 'ascend' ? "sort=apiPath" : "sort=-apiPath";
+        if (sort && sort.path) {
+            sortBy = sort.path === 'ascend' ? "sort=path" : "sort=-path";
         }
         if (sort && sort.method) {
             sortBy = sort.method === 'ascend' ? "sort=method" : "sort=-method";

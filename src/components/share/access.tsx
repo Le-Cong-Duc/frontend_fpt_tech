@@ -4,7 +4,7 @@ import { useAppSelector } from '@/redux/hooks';
 interface IProps {
     hideChildren?: boolean;
     children: React.ReactNode;
-    permission: { method: string, apiPath: string, module: string };
+    permission: { method: string, path: string, module: string };
 }
 
 const Access = (props: IProps) => {
@@ -16,18 +16,13 @@ const Access = (props: IProps) => {
     const permissions = useAppSelector(state => state.account.user.permissions);
 
     useEffect(() => {
-        if (permissions.length) {
-            const check = permissions.find(item =>
-                item.apiPath === permission.apiPath
-                && item.method === permission.method
-                && item.module === permission.module
-            )
-            if (check) {
-                setAllow(true)
-            } else
-                setAllow(false);
-        }
-    }, [permissions])
+        const check = permissions.find(item =>
+            (item.path ?? item.path) === permission.path
+            && item.method === permission.method
+            && item.module === permission.module
+        );
+        setAllow(Boolean(check));
+    }, [permissions, permission])
 
     return (
         <>

@@ -1,9 +1,9 @@
 const resourcePermissions = (resource: string, module: string) => ({
-    GET_PAGINATE: { method: 'GET', apiPath: `/api/v1/${resource}`, path: `/api/v1/${resource}`, module },
-    GET_BY_ID: { method: 'GET', apiPath: `/api/v1/${resource}/:id`, path: `/api/v1/${resource}/:id`, module },
-    CREATE: { method: 'POST', apiPath: `/api/v1/${resource}`, path: `/api/v1/${resource}`, module },
-    UPDATE: { method: 'PATCH', apiPath: `/api/v1/${resource}/:id`, path: `/api/v1/${resource}/:id`, module },
-    DELETE: { method: 'DELETE', apiPath: `/api/v1/${resource}/:id`, path: `/api/v1/${resource}/:id`, module },
+    GET_PAGINATE: { method: 'GET', path: `/api/v1/${resource}`, path: `/api/v1/${resource}`, module },
+    GET_BY_ID: { method: 'GET', path: `/api/v1/${resource}/:id`, path: `/api/v1/${resource}/:id`, module },
+    CREATE: { method: 'POST', path: `/api/v1/${resource}`, path: `/api/v1/${resource}`, module },
+    UPDATE: { method: 'PATCH', path: `/api/v1/${resource}/:id`, path: `/api/v1/${resource}/:id`, module },
+    DELETE: { method: 'DELETE', path: `/api/v1/${resource}/:id`, path: `/api/v1/${resource}/:id`, module },
 });
 
 export const ALL_PERMISSIONS = {

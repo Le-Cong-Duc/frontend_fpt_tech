@@ -41,7 +41,7 @@ const LayoutAdmin = () => {
     useEffect(() => {
         if (permissions?.length) {
             const canView = (resource: keyof typeof ALL_PERMISSIONS) => permissions.some(item =>
-                (item.path ?? item.apiPath) === ALL_PERMISSIONS[resource].GET_PAGINATE.path
+                (item.path ?? item.path) === ALL_PERMISSIONS[resource].GET_PAGINATE.path
                 && item.method === 'GET'
             );
 

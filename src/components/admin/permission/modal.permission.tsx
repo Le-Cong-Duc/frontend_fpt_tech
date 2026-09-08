@@ -21,12 +21,12 @@ const ModalPermission = (props: IProps) => {
 
 
     const submitPermission = async (valuesForm: any) => {
-        const { name, apiPath, method, module } = valuesForm;
+        const { name, path, method, module } = valuesForm;
         if (dataInit?._id) {
             //update
             const permission = {
                 name,
-                apiPath, method, module
+                path, method, module
             }
 
             const res = await callUpdatePermission(permission, dataInit._id);
@@ -44,7 +44,7 @@ const ModalPermission = (props: IProps) => {
             //create
             const permission = {
                 name,
-                apiPath, method, module
+                path, method, module
             }
             const res = await callCreatePermission(permission);
             if (res.data) {
@@ -101,7 +101,7 @@ const ModalPermission = (props: IProps) => {
                     <Col lg={12} md={12} sm={24} xs={24}>
                         <ProFormText
                             label="API Path"
-                            name="apiPath"
+                            name="path"
                             rules={[
                                 { required: true, message: 'Vui lòng không bỏ trống' },
                             ]}

@@ -23,7 +23,7 @@ const ViewDetailPermission = (props: IProps) => {
             >
                 <Descriptions title="" bordered column={2} layout="vertical">
                     <Descriptions.Item label="Tên Permission">{dataInit?.name}</Descriptions.Item>
-                    <Descriptions.Item label="API Path">{dataInit?.apiPath}</Descriptions.Item>
+                    <Descriptions.Item label="API Path">{dataInit?.path}</Descriptions.Item>
 
                     <Descriptions.Item label="Method">{dataInit?.method}</Descriptions.Item>
                     <Descriptions.Item label="Thuộc Module">{dataInit?.module}</Descriptions.Item>
