@@ -29,7 +29,6 @@ export interface IAccount {
             _id: string;
             name: string;
             path: string;
-            apiPath?: string;
             method: string;
             module: string;
         }[]
@@ -133,7 +132,6 @@ export interface IUser {
 export interface IPermission {
     _id?: string;
     name?: string;
-    apiPath?: string;
     path?: string;
     method?: string;
     module?: string;
