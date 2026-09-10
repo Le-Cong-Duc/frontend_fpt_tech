@@ -16,7 +16,6 @@ import {
 import { Layout, Menu, Dropdown, Space, message, Avatar, Button } from 'antd';
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { Link } from 'react-router-dom';
-import { callLogout } from 'config/api';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { isMobile } from 'react-device-detect';
 import type { MenuProps } from 'antd';
@@ -27,6 +26,7 @@ const { Content, Footer, Sider } = Layout;
 
 const LayoutAdmin = () => {
     const location = useLocation();
+    const isManager = location.pathname.startsWith('/manager');
 
     const [collapsed, setCollapsed] = useState(false);
     const [activeMenu, setActiveMenu] = useState('');
@@ -39,7 +39,7 @@ const LayoutAdmin = () => {
     const dispatch = useAppDispatch();
 
     useEffect(() => {
-        if (permissions?.length) {
+        {
             const canView = (resource: keyof typeof ALL_PERMISSIONS) => permissions.some(item =>
                 (item.path ?? item.apiPath) === ALL_PERMISSIONS[resource].GET_PAGINATE.path
                 && item.method === 'GET'
@@ -47,8 +47,8 @@ const LayoutAdmin = () => {
 
             const full = [
                 {
-                    label: <Link to='/admin'>Dashboard</Link>,
-                    key: '/admin',
+                    label: <Link to={isManager ? '/manager' : '/admin'}>Dashboard</Link>,
+                    key: isManager ? '/manager' : '/admin',
                     icon: <AppstoreOutlined />
                 },
                 ...(canView('USERS') ? [{
@@ -80,32 +80,18 @@ const LayoutAdmin = () => {
 
             ];
 
-            setMenuItems(full);
+            setMenuItems(isManager ? full.slice(0, 1) : full);
         }
-    }, [permissions])
+    }, [permissions, isManager])
     useEffect(() => {
         setActiveMenu(location.pathname)
     }, [location])
 
-    const handleLogout = async () => {
-        const res = await callLogout();
-        if (res && res.data) {
-            dispatch(setLogoutAction({}));
-            message.success('Đăng xuất thành công');
-            navigate('/')
-        }
+    const handleLogout = () => {
+        dispatch(setLogoutAction({}));
+        message.success('Đăng xuất thành công');
+        navigate('/login');
     }
-
-    // if (isMobile) {
-    //     items.push({
-    //         label: <label
-    //             style={{ cursor: 'pointer' }}
-    //             onClick={() => handleLogout()}
-    //         >Đăng xuất</label>,
-    //         key: 'logout',
-    //         icon: <LogoutOutlined />
-    //     })
-    // }
 
     const itemsDropdown = [
         {
@@ -134,7 +120,7 @@ const LayoutAdmin = () => {
                         collapsed={collapsed}
                         onCollapse={(value) => setCollapsed(value)}>
                         <div style={{ height: 32, margin: 16, textAlign: 'center' }}>
-                            <BugOutlined />  ADMIN
+                            <BugOutlined />  {isManager ? 'MANAGER' : 'ADMIN'}
                         </div>
                         <Menu
                             selectedKeys={[activeMenu]}

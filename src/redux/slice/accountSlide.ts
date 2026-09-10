@@ -37,7 +37,7 @@ interface IState {
 
 const initialState: IState = {
     isAuthenticated: false,
-    isLoading: true,
+    isLoading: false,
     isRefreshToken: false,
     errorRefreshToken: "",
     user: {
@@ -115,10 +115,8 @@ export const accountSlide = createSlice({
         })
 
         builder.addCase(fetchAccount.rejected, (state, action) => {
-            if (action.payload) {
-                state.isAuthenticated = false;
-                state.isLoading = false;
-            }
+            state.isAuthenticated = false;
+            state.isLoading = false;
         })
 
     },

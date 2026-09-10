@@ -1,11 +1,9 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { createBrowserRouter, Outlet, RouterProvider, useLocation } from 'react-router-dom';
-import { useAppDispatch } from '@/redux/hooks';
+import { createBrowserRouter, Navigate, Outlet, RouterProvider, useLocation } from 'react-router-dom';
 import NotFound from 'components/share/not.found';
 import LoginPage from 'pages/auth/login';
 import RegisterPage from 'pages/auth/register';
 import LayoutAdmin from 'components/admin/layout.admin';
-import ProtectedRoute from 'components/share/protected-route.ts';
 import Header from 'components/client/header.client';
 import Footer from 'components/client/footer.client';
 import HomePage from 'pages/home';
@@ -14,8 +12,8 @@ import DashboardPage from './pages/admin/dashboard';
 import PermissionPage from './pages/admin/permission';
 import RolePage from './pages/admin/role';
 import UserPage from './pages/admin/user';
-import { fetchAccount } from './redux/slice/accountSlide';
 import LayoutApp from './components/share/layout.app';
+import UserDashboard from './pages/user/dashboard';
 
 const BackendModulePage = ({ title, endpoint }: { title: string; endpoint: string }) => (
     <div style={{ padding: 24 }}>
@@ -24,9 +22,7 @@ const BackendModulePage = ({ title, endpoint }: { title: string; endpoint: strin
     </div>
 );
 
-const ProtectedModuleRoute = ({ children }: { children: ReactNode }) => (
-    <ProtectedRoute>{children}</ProtectedRoute>
-);
+const ProtectedModuleRoute = ({ children }: { children: ReactNode }) => <>{children}</>;
 
 const LayoutClient = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -49,20 +45,10 @@ const LayoutClient = () => {
 };
 
 export default function App() {
-    const dispatch = useAppDispatch();
-
-    useEffect(() => {
-        if (!['/login', '/register'].includes(window.location.pathname)) {
-            dispatch(fetchAccount());
-        }
-    }, [dispatch]);
-
     const router = createBrowserRouter([
         {
             path: '/',
-            element: <LayoutApp><LayoutClient /></LayoutApp>,
-            errorElement: <NotFound />,
-            children: [{ index: true, element: <HomePage /> }],
+            element: <Navigate to="/login" replace />,
         },
         {
             path: '/admin',
@@ -82,6 +68,20 @@ export default function App() {
                 { path: 'conversations', element: <ProtectedModuleRoute><BackendModulePage title="Conversations" endpoint="/conversations" /></ProtectedModuleRoute> },
                 { path: 'messages', element: <ProtectedModuleRoute><BackendModulePage title="Messages" endpoint="/messages" /></ProtectedModuleRoute> },
                 { path: 'notifications', element: <ProtectedModuleRoute><BackendModulePage title="Notifications" endpoint="/notifications" /></ProtectedModuleRoute> },
+            ],
+        },
+        {
+            path: '/user',
+            element: <LayoutClient />,
+            errorElement: <NotFound />,
+            children: [{ index: true, element: <UserDashboard /> }],
+        },
+        {
+            path: '/manager',
+            element: <LayoutApp><LayoutAdmin /></LayoutApp>,
+            errorElement: <NotFound />,
+            children: [
+                { index: true, element: <ProtectedModuleRoute><DashboardPage /></ProtectedModuleRoute> },
             ],
         },
         { path: '/login', element: <LoginPage /> },

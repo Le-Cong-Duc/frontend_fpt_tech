@@ -1,16 +1,14 @@
-import { Button, Divider, Form, Input, message, notification } from 'antd';
+import { Button, Divider, Form, Input, Select, message } from 'antd';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { callLogin } from 'config/api';
 import { useState, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { setUserLoginInfo } from '@/redux/slice/accountSlide';
 import styles from 'styles/auth.module.scss';
-import { useAppSelector } from '@/redux/hooks';
 
 const LoginPage = () => {
     const navigate = useNavigate();
     const [isSubmit, setIsSubmit] = useState(false);
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const isAuthenticated = useAppSelector(state => state.account.isAuthenticated);
 
     let location = useLocation();
@@ -18,31 +16,25 @@ const LoginPage = () => {
     const callback = params?.get("callback");
 
     useEffect(() => {
-        //đã login => redirect to '/'
         if (isAuthenticated) {
-            // navigate('/');
-            window.location.href = '/';
+            navigate('/admin', { replace: true });
         }
-    }, [])
+    }, [isAuthenticated, navigate])
 
-    const onFinish = async (values: any) => {
-        const { username, password } = values;
+    const onFinish = (values: { username: string; role: string }) => {
+        const { username, role } = values;
         setIsSubmit(true);
-        const res = await callLogin(username, password);
+        dispatch(setUserLoginInfo({
+            _id: `demo-${role.toLowerCase()}`,
+            name: username || (role === 'MANAGER' ? 'Manager Demo' : 'Admin Demo'),
+            email: `${role.toLowerCase()}@demo.local`,
+            role: { _id: role.toLowerCase(), name: role },
+            permissions: [],
+        }));
+        message.success('Đăng nhập bản demo thành công!');
+        const dashboardPath = role === 'MANAGER' ? '/manager' : '/admin';
+        navigate(callback || dashboardPath);
         setIsSubmit(false);
-        if (res?.data) {
-            localStorage.setItem('access_token', res.data.access_token);
-            dispatch(setUserLoginInfo(res.data.user))
-            message.success('Đăng nhập tài khoản thành công!');
-            window.location.href = callback ? callback : '/';
-        } else {
-            notification.error({
-                message: "Có lỗi xảy ra",
-                description:
-                    res.message && Array.isArray(res.message) ? res.message[0] : res.message,
-                duration: 5
-            })
-        }
     };
 
 
@@ -69,6 +61,15 @@ const LoginPage = () => {
                                 rules={[{ required: true, message: 'Email không được để trống!' }]}
                             >
                                 <Input />
+                            </Form.Item>
+
+                            <Form.Item
+                                labelCol={{ span: 24 }}
+                                label="Vai trò bản demo"
+                                name="role"
+                                initialValue="ADMIN"
+                            >
+                                <Select options={[{ value: 'ADMIN', label: 'Admin' }, { value: 'MANAGER', label: 'Manager' }]} />
                             </Form.Item>
 
                             <Form.Item
