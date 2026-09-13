@@ -22,6 +22,7 @@ import EnrollmentPage from './pages/admin/enrollment';
 import InvoicePage from './pages/admin/invoice';
 import PaymentPage from './pages/admin/payment';
 import LeadPage from './pages/admin/lead';
+import CourseDetailPage from './pages/course/detail';
 
 const BackendModulePage = ({ title, endpoint }: { title: string; endpoint: string }) => (
     <div style={{ padding: 24 }}>
@@ -70,6 +71,7 @@ export default function App() {
             errorElement: <NotFound />,
             children: [{ index: true, element: <HomePage /> }],
         },
+        { path: '/courses/:id', element: <LayoutApp><LayoutClient /></LayoutApp>, errorElement: <NotFound />, children: [{ index: true, element: <CourseDetailPage /> }] },
         {
             path: '/admin',
             element: <LayoutApp><LayoutAdmin /></LayoutApp>,

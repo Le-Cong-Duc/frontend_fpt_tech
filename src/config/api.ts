@@ -67,7 +67,7 @@ export const callDeletePayment = (id: string) => remove<IPayment>('payments', id
 export const callFetchPayment = (query = '') => list<IPayment>('payments', query);
 export const callFetchPaymentById = (id: string) => findById<IPayment>('payments', id);
 
-export const callCreateLead = (value: Omit<ILead, '_id'>) => create<ILead>('leads', value);
+export const callCreateLead = (value: { full_name: string; phone: string; email: string; course_name: string; note?: string }) => axios.post<IBackendRes<ILead>>(`${API_PREFIX}/leads`, value);
 export const callUpdateLead = (value: Partial<ILead>, id: string) => update<ILead>('leads', id, value);
 export const callDeleteLead = (id: string) => remove<ILead>('leads', id);
 export const callFetchLead = (query = '') => list<ILead>('leads', query);
