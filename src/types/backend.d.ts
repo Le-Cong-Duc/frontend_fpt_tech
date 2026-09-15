@@ -56,7 +56,34 @@ export interface IClassroom {
     max_student?: string | number;
     start_date?: string;
     end_date?: string;
+    start_time?: string;
+    end_time?: string;
     status?: 'OPEN' | 'COMPLETED' | 'CANCELLED' | string;
+}
+
+export interface IUserSummary {
+    _id?: string;
+    name?: string;
+    email?: string;
+    phone?: string;
+}
+
+export interface IClassroomWithDetails extends Omit<IClassroom, 'course_id' | 'teacher_id'> {
+    course_id?: Pick<ICourse, '_id' | 'name' | 'description' | 'level' | 'duration'>;
+    teacher_id?: IUserSummary;
+}
+
+export interface IPortalEnrollment extends Omit<IEnrollment, 'student_id' | 'class_id'> {
+    student_id?: IUserSummary;
+    class_id?: IClassroomWithDetails;
+}
+
+export interface IPortalInvoice extends Omit<IInvoice, 'enrollment_id'> {
+    enrollment_id?: IPortalEnrollment;
+}
+
+export interface IPortalPayment extends Omit<IPayment, 'invoice_id'> {
+    invoice_id?: IPortalInvoice;
 }
 
 export interface IEnrollment {

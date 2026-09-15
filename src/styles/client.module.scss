@@ -96,7 +96,19 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        gap: 16px;
         width: 100%;
+        min-width: 0;
+
+        .menu-scroll {
+            flex: 1;
+            min-width: 0;
+            overflow-x: auto;
+
+            :global(.ant-menu) {
+                min-width: max-content;
+            }
+        }
 
         .extra {
 
@@ -454,4 +466,56 @@
         .detail-facts { grid-template-columns: 1fr; }
         .classroom-row { flex-direction: column; gap: 6px; }
     }
+}
+
+.portal-section { padding-top: 30px; padding-bottom: 72px; }
+
+.portal-hero {
+    padding: 32px 38px;
+    color: #fff;
+    background: linear-gradient(115deg, #172b4d 0%, #1f6f78 100%);
+    border-radius: 16px;
+    span { color: #f7c873; font-size: 11px; font-weight: 700; letter-spacing: 1.3px; }
+    h1 { margin: 8px 0; font-size: clamp(28px, 4vw, 38px); }
+    p { max-width: 620px; margin: 0; color: rgba(255, 255, 255, .78); line-height: 1.6; }
+}
+
+.portal-stats { margin-top: 22px; }
+.portal-stats :global(.ant-card) { border-color: #e4ebef; box-shadow: 0 7px 20px rgba(28, 49, 74, .05); }
+.portal-content { margin-top: 22px; }
+.portal-loading { display: grid; min-height: 220px; place-items: center; }
+.portal-card { border-color: #e4ebef; box-shadow: 0 7px 20px rgba(28, 49, 74, .05); }
+.portal-card p { color: #6f7d8c; }
+.portal-action { margin-top: 24px; }
+.profile-form { max-width: 520px; margin-top: 28px; padding-top: 24px; border-top: 1px solid #edf0f2; }
+.profile-form h3 { margin: 0 0 20px; color: #172b4d; }
+.portal-link { padding-left: 0; color: #1f6f78; }
+.portal-alert { margin-top: 22px; }
+.schedule-list { display: grid; gap: 14px; }
+
+.schedule-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    > div:nth-child(2) { flex: 1; }
+    h3 { margin: 0 0 5px; color: #172b4d; }
+    p { margin: 0; }
+}
+
+.schedule-date {
+    display: flex;
+    flex-direction: column;
+    min-width: 66px;
+    padding: 9px;
+    color: #1f6f78;
+    background: #e6f3f1;
+    border-radius: 9px;
+    text-align: center;
+    b { font-size: 24px; line-height: 1; }
+    span { margin-top: 4px; font-size: 10px; font-weight: 700; }
+}
+
+@media (max-width: 600px) {
+    .portal-hero { padding: 26px 22px; }
+    .schedule-row { align-items: flex-start; flex-wrap: wrap; }
 }

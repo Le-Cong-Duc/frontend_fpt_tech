@@ -23,6 +23,8 @@ import InvoicePage from './pages/admin/invoice';
 import PaymentPage from './pages/admin/payment';
 import LeadPage from './pages/admin/lead';
 import CourseDetailPage from './pages/course/detail';
+import PortalPage from './pages/portal';
+import PortalRoute from './components/client/portal-route';
 
 const BackendModulePage = ({ title, endpoint }: { title: string; endpoint: string }) => (
     <div style={{ padding: 24 }}>
@@ -46,7 +48,7 @@ const LayoutClient = () => {
 
     return (
         <div className="layout-app" ref={rootRef}>
-            <Header searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+            <Header />
             <div className={styles['content-app']}>
                 <Outlet context={[searchTerm, setSearchTerm]} />
             </div>
@@ -72,6 +74,22 @@ export default function App() {
             children: [{ index: true, element: <HomePage /> }],
         },
         { path: '/courses/:id', element: <LayoutApp><LayoutClient /></LayoutApp>, errorElement: <NotFound />, children: [{ index: true, element: <CourseDetailPage /> }] },
+        {
+            path: '/portal',
+            element: <LayoutApp><LayoutClient /></LayoutApp>,
+            errorElement: <NotFound />,
+            children: [
+                { index: true, element: <PortalRoute><PortalPage screen="home" /></PortalRoute> },
+                { path: 'my-courses', element: <PortalRoute path="/portal/my-courses"><PortalPage screen="my-courses" /></PortalRoute> },
+                { path: 'classes', element: <PortalRoute path="/portal/classes"><PortalPage screen="classes" /></PortalRoute> },
+                { path: 'schedule', element: <PortalRoute path="/portal/schedule"><PortalPage screen="schedule" /></PortalRoute> },
+                { path: 'invoices', element: <PortalRoute path="/portal/invoices"><PortalPage screen="invoices" /></PortalRoute> },
+                { path: 'payments', element: <PortalRoute path="/portal/payments"><PortalPage screen="payments" /></PortalRoute> },
+                { path: 'students', element: <PortalRoute path="/portal/students"><PortalPage screen="students" /></PortalRoute> },
+                { path: 'leads', element: <PortalRoute path="/portal/leads"><PortalPage screen="leads" /></PortalRoute> },
+                { path: 'profile', element: <PortalRoute path="/portal/profile"><PortalPage screen="profile" /></PortalRoute> },
+            ],
+        },
         {
             path: '/admin',
             element: <LayoutApp><LayoutAdmin /></LayoutApp>,

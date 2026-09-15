@@ -86,6 +86,9 @@ export const accountSlide = createSlice({
                 permissions: [],
             }
         },
+        setProfileAction: (state, action) => {
+            state.user.name = action.payload?.name ?? state.user.name;
+        },
         setRefreshTokenAction: (state, action) => {
             state.isRefreshToken = action.payload?.status ?? false;
             state.errorRefreshToken = action.payload?.message ?? "";
@@ -125,7 +128,7 @@ export const accountSlide = createSlice({
 });
 
 export const {
-    setActiveMenu, setUserLoginInfo, setLogoutAction, setRefreshTokenAction
+    setActiveMenu, setUserLoginInfo, setLogoutAction, setProfileAction, setRefreshTokenAction
 } = accountSlide.actions;
 
 export default accountSlide.reducer;
