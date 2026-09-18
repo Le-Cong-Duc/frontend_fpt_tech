@@ -502,6 +502,16 @@
 .portal-loading { display: grid; min-height: 220px; place-items: center; }
 .portal-card { border-color: #e4ebef; box-shadow: 0 7px 20px rgba(28, 49, 74, .05); }
 .portal-card p { color: #6f7d8c; }
+.table-actions { display: flex; gap: 8px; }
+.manager-class-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 240px;
+    padding-left: 18px;
+    border-left: 1px solid #edf0f2;
+}
+.manager-class-actions :global(.ant-btn) { width: 100%; }
 .portal-action { margin-top: 24px; }
 .profile-form { max-width: 520px; margin-top: 28px; padding-top: 24px; border-top: 1px solid #edf0f2; }
 .profile-form h3 { margin: 0 0 20px; color: #172b4d; }
@@ -534,4 +544,12 @@
 @media (max-width: 600px) {
     .portal-hero { padding: 26px 22px; }
     .schedule-row { align-items: flex-start; flex-wrap: wrap; }
+    .manager-class-actions {
+        width: 100%;
+        min-width: 0;
+        padding-top: 14px;
+        padding-left: 0;
+        border-top: 1px solid #edf0f2;
+        border-left: 0;
+    }
 }

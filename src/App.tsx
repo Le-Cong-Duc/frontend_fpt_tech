@@ -86,6 +86,8 @@ export default function App() {
                 { path: 'invoices', element: <PortalRoute path="/portal/invoices"><PortalPage screen="invoices" /></PortalRoute> },
                 { path: 'payments', element: <PortalRoute path="/portal/payments"><PortalPage screen="payments" /></PortalRoute> },
                 { path: 'students', element: <PortalRoute path="/portal/students"><PortalPage screen="students" /></PortalRoute> },
+                { path: 'teachers', element: <PortalRoute path="/portal/teachers"><PortalPage screen="teachers" /></PortalRoute> },
+                { path: 'courses', element: <PortalRoute path="/portal/courses"><PortalPage screen="courses" /></PortalRoute> },
                 { path: 'leads', element: <PortalRoute path="/portal/leads"><PortalPage screen="leads" /></PortalRoute> },
                 { path: 'profile', element: <PortalRoute path="/portal/profile"><PortalPage screen="profile" /></PortalRoute> },
             ],
