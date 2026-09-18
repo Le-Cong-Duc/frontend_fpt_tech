@@ -1,56 +1,20 @@
 .container {
-    padding-right: 15px;
-    padding-left: 15px;
-    margin-right: auto;
-    margin-left: auto;
+    width: min(1280px, calc(100% - 32px));
+    margin: 0 auto;
 }
 
-@media (min-width: 768px) {
-    .container {
-        width: 750px;
-    }
+:global(::-webkit-scrollbar) {
+    width: 8px;
+    height: 8px;
 }
 
-@media (min-width: 992px) {
-    .container {
-        width: 970px;
-    }
+:global(::-webkit-scrollbar-thumb) {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 999px;
 }
 
-@media (min-width: 1260px) {
-    .container {
-        width: 1260px;
-    }
-}
-
-@media (min-width: 767px) {
-
-    ::-webkit-scrollbar {
-        width: 8px;
-    }
-
-    ::-webkit-scrollbar-button {
-        width: 8px;
-        height: 5px;
-    }
-
-    ::-webkit-scrollbar-track {
-        background: rgb(255, 255, 255);
-        border: thin solid rgb(238, 238, 238);
-        box-shadow: 0px 0px 3px #dfdfdf inset;
-        border-radius: 10px;
-    }
-
-    ::-webkit-scrollbar-thumb {
-        background: #ccc;
-        border: thin solid #ccc;
-        border-radius: 10px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-        background: #7d7d7d;
-    }
-
+:global(::-webkit-scrollbar-track) {
+    background: transparent;
 }
 
 @-moz-keyframes spin {
@@ -73,55 +37,94 @@
 }
 
 .header-section {
-    display: block;
     width: 100%;
-    height: 55px;
-    background-color: #222831;
+    background: linear-gradient(180deg, #111827 0%, #1a2333 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.2);
+
+    .header-inner {
+        display: flex;
+        align-items: center;
+        gap: 26px;
+        min-height: 62px;
+    }
 
     .brand {
         display: flex;
         align-items: center;
         justify-content: center;
+        flex-shrink: 0;
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.06);
 
         svg {
             cursor: pointer;
-            color: #1677ff;
-            font-size: 30px;
-            margin-top: 7px;
-            animation: spin 20s linear infinite;
+            color: #4ca6ff;
+            font-size: 24px;
+            animation: spin 18s linear infinite;
         }
     }
 
     .top-menu {
         display: flex;
-        justify-content: space-between;
         align-items: center;
+        justify-content: space-between;
         gap: 16px;
         width: 100%;
         min-width: 0;
+    }
 
-        .menu-scroll {
-            flex: 1;
+    .menu-scroll {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+
+        :global(.ant-menu-horizontal) {
+            background: transparent;
+            border-bottom: 0;
+            line-height: 1.2;
             min-width: 0;
-            overflow-x: auto;
-
-            :global(.ant-menu) {
-                min-width: max-content;
-            }
         }
 
-        .extra {
+        :global(.ant-menu-item) {
+            color: #dfe7f2;
+            border-bottom: 2px solid transparent;
+            padding-inline: 12px;
+            height: 42px;
+            line-height: 42px;
+        }
 
-            a,
-            span {
-                cursor: pointer;
-                display: block;
-                color: #a7a7a7;
-                text-decoration: none;
+        :global(.ant-menu-item-selected) {
+            color: #fff !important;
+            border-bottom-color: #fff !important;
+            background: rgba(255, 255, 255, 0.04) !important;
+        }
 
-                &:hover {
-                    color: #fff;
-                }
+        :global(.ant-menu-item:hover) {
+            color: #fff !important;
+        }
+    }
+
+    .extra {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+
+        a,
+        span {
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            color: #dfe7f2;
+            text-decoration: none;
+            transition: color 0.2s ease;
+
+            &:hover {
+                color: #fff;
             }
         }
     }
@@ -130,8 +133,21 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        height: 55px;
+        min-height: 56px;
         color: white;
+        font-weight: 600;
+    }
+}
+
+@media (max-width: 767px) {
+    .header-section {
+        .header-inner {
+            min-height: 56px;
+        }
+
+        .top-menu {
+            display: none;
+        }
     }
 }
 

@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { DashOutlined, LogoutOutlined, MenuFoldOutlined, TwitterOutlined } from '@ant-design/icons';
 import { Avatar, ConfigProvider, Drawer, Dropdown, Menu, type MenuProps, Space, message } from 'antd';
-import { isMobile } from 'react-device-detect';
 import { FaReact } from 'react-icons/fa';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
@@ -18,9 +17,17 @@ const Header = () => {
     const user = useAppSelector(state => state.account.user);
     const [openMobileMenu, setOpenMobileMenu] = useState(false);
     const [current, setCurrent] = useState('/');
+    const [isCompact, setIsCompact] = useState(false);
     const isBackoffice = isBackofficeRole(user.role?.name);
 
     useEffect(() => setCurrent(location.pathname), [location]);
+
+    useEffect(() => {
+        const handleResize = () => setIsCompact(window.innerWidth < 768);
+        handleResize();
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     const menuItems: MenuProps['items'] = [
         { label: <Link to="/">Trang Chủ</Link>, key: '/', icon: <TwitterOutlined /> },
@@ -50,26 +57,70 @@ const Header = () => {
     return <>
         <div className={styles['header-section']}>
             <div className={styles.container}>
-                {!isMobile ? <div style={{ display: 'flex', gap: 30 }}>
-                    <div className={styles.brand}><FaReact onClick={() => navigate('/')} title="Education Management" /></div>
-                    <div className={styles['top-menu']}>
-                        <div className={styles['menu-scroll']}>
-                            <ConfigProvider theme={{ token: { colorPrimary: '#fff', colorBgContainer: '#222831', colorText: '#a7a7a7' } }}>
-                                <Menu disabledOverflow selectedKeys={[current]} mode="horizontal" items={menuItems} />
-                            </ConfigProvider>
+                {!isCompact ? (
+                    <div className={styles['header-inner']}>
+                        <div className={styles.brand}>
+                            <FaReact onClick={() => navigate('/')} title="Education Management" />
                         </div>
-                        <div className={styles.extra}>
-                            {!isAuthenticated ? <Link to="/login">Đăng nhập</Link> :
-                                <Dropdown menu={{ items: dropdownItems }} trigger={['click']}>
-                                    <Space style={{ cursor: 'pointer' }}><span>Chào {user.name}</span><Avatar>{user.name?.substring(0, 2)?.toUpperCase()}</Avatar></Space>
-                                </Dropdown>}
+
+                        <div className={styles['top-menu']}>
+                            <div className={styles['menu-scroll']}>
+                                <ConfigProvider theme={{
+                                    token: {
+                                        colorPrimary: '#fff',
+                                        colorBgContainer: '#1d2736',
+                                        colorText: '#b5c0cf',
+                                        colorTextDescription: '#fff',
+                                        colorSplit: 'transparent',
+                                        controlItemBgActive: 'rgba(255,255,255,0.08)',
+                                    }
+                                }}>
+                                    <Menu
+                                        inlineIndent={0}
+                                        selectedKeys={[current]}
+                                        mode="horizontal"
+                                        items={menuItems}
+                                        overflowedIndicator={null}
+                                    />
+                                </ConfigProvider>
+                            </div>
+
+                            <div className={styles.extra}>
+                                {!isAuthenticated ? (
+                                    <Link to="/login">Đăng nhập</Link>
+                                ) : (
+                                    <Dropdown menu={{ items: dropdownItems }} trigger={['click']}>
+                                        <Space style={{ cursor: 'pointer' }}>
+                                            <span>Chào {user.name}</span>
+                                            <Avatar>{user.name?.substring(0, 2)?.toUpperCase()}</Avatar>
+                                        </Space>
+                                    </Dropdown>
+                                )}
+                            </div>
                         </div>
                     </div>
-                </div> : <div className={styles['header-mobile']}><span>Education Management</span><MenuFoldOutlined onClick={() => setOpenMobileMenu(true)} /></div>}
+                ) : (
+                    <div className={styles['header-mobile']}>
+                        <span>Education Management</span>
+                        <MenuFoldOutlined onClick={() => setOpenMobileMenu(true)} />
+                    </div>
+                )}
             </div>
         </div>
+
         <Drawer title="Chức năng" placement="right" onClose={() => setOpenMobileMenu(false)} open={openMobileMenu}>
-            <Menu onClick={({ key }) => { setCurrent(key); setOpenMobileMenu(false); }} selectedKeys={[current]} mode="vertical" items={[...menuItems, ...(isAuthenticated ? dropdownItems : [])]} />
+            <Menu
+                onClick={({ key }) => {
+                    setCurrent(key);
+                    setOpenMobileMenu(false);
+                    if (key !== 'logout' && key !== 'admin') {
+                        navigate(key.toString());
+                    }
+                }}
+                selectedKeys={[current]}
+                mode="vertical"
+                items={[...menuItems, ...(isAuthenticated ? dropdownItems : [])]}
+            />
         </Drawer>
     </>;
 };
