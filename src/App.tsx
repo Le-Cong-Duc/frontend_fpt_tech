@@ -24,6 +24,7 @@ import PaymentPage from './pages/admin/payment';
 import LeadPage from './pages/admin/lead';
 import CourseDetailPage from './pages/course/detail';
 import PortalPage from './pages/portal';
+import ClassDetailPage from './pages/portal/class-detail';
 import PortalRoute from './components/client/portal-route';
 
 const BackendModulePage = ({ title, endpoint }: { title: string; endpoint: string }) => (
@@ -82,6 +83,7 @@ export default function App() {
                 { index: true, element: <PortalRoute><PortalPage screen="home" /></PortalRoute> },
                 { path: 'my-courses', element: <PortalRoute path="/portal/my-courses"><PortalPage screen="my-courses" /></PortalRoute> },
                 { path: 'classes', element: <PortalRoute path="/portal/classes"><PortalPage screen="classes" /></PortalRoute> },
+                { path: 'classes/:id', element: <PortalRoute><ClassDetailPage /></PortalRoute> },
                 { path: 'schedule', element: <PortalRoute path="/portal/schedule"><PortalPage screen="schedule" /></PortalRoute> },
                 { path: 'invoices', element: <PortalRoute path="/portal/invoices"><PortalPage screen="invoices" /></PortalRoute> },
                 { path: 'payments', element: <PortalRoute path="/portal/payments"><PortalPage screen="payments" /></PortalRoute> },

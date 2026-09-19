@@ -36,7 +36,7 @@ export const portalMenu: PortalMenuItem[] = [
     { key: '/portal/my-courses', label: 'Khóa học của tôi', roles: ['STUDENT'], icon: <BookOutlined /> },
     { key: '/portal/classes', label: 'Lớp học', roles: ['STUDENT', 'TEACHER', 'MANAGER'], icon: <TeamOutlined /> },
     { key: '/portal/schedule', label: 'Lịch học', roles: ['STUDENT', 'TEACHER', 'CONSULTANT'], icon: <CalendarOutlined /> },
-    { key: '/portal/invoices', label: 'Hóa đơn', roles: ['STUDENT', 'MANAGER'], icon: <FileTextOutlined /> },
+    { key: '/portal/invoices', label: 'Hóa đơn', roles: ['MANAGER'], icon: <FileTextOutlined /> },
     { key: '/portal/payments', label: 'Thanh toán', roles: ['STUDENT'], icon: <CreditCardOutlined /> },
     { key: '/portal/students', label: 'Học viên', roles: ['TEACHER', 'MANAGER'], icon: <TeamOutlined /> },
     { key: '/portal/teachers', label: 'Giảng viên', roles: ['MANAGER'], icon: <UserOutlined /> },

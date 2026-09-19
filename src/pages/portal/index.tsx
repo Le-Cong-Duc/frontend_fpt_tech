@@ -3,10 +3,13 @@ import { Alert, Button, Card, Col, Descriptions, Empty, Form, Input, Modal, Popc
 import { BookOutlined, CalendarOutlined, CreditCardOutlined, DeleteOutlined, EditOutlined, FileTextOutlined, PlusOutlined, TeamOutlined, UserAddOutlined } from '@ant-design/icons';
 import {
     callCreateEnrollment,
+    callCreateClassroom,
     callCreateCourse,
+    callDeleteClassroom,
     callDeleteCourse,
     callFetchClassroom,
     callFetchCourse,
+    callFetchEnrollment,
     callFetchInvoice,
     callFetchMyAssignedLeads,
     callFetchMyEnrollments,
@@ -21,8 +24,9 @@ import {
 } from '@/config/api';
 import { getPortalRole, type PortalRole } from '@/config/portal';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
+import { useNavigate } from 'react-router-dom';
 import { setProfileAction } from '@/redux/slice/accountSlide';
-import type { IClassroomWithDetails, ICourse, IInvoice, ILead, IPortalEnrollment, IPortalInvoice, IPortalPayment, IUser } from '@/types/backend';
+import type { IClassroom, IClassroomWithDetails, ICourse, IEnrollment, IInvoice, ILead, IPortalEnrollment, IPortalInvoice, IPortalPayment, IUser, IUserSummary } from '@/types/backend';
 import styles from '@/styles/client.module.scss';
 
 type PortalScreen = 'home' | 'my-courses' | 'classes' | 'schedule' | 'invoices' | 'payments' | 'students' | 'teachers' | 'courses' | 'leads' | 'profile';
@@ -62,10 +66,29 @@ const toArray = <T,>(response: unknown): T[] => {
 const dateText = (value?: string) => value ? new Date(value).toLocaleDateString('vi-VN') : 'Chưa cập nhật';
 const moneyText = (value?: number) => typeof value === 'number' ? `${value.toLocaleString('vi-VN')} đ` : 'Chưa cập nhật';
 const roleCodeOf = (user: IUser) => user.role?.name?.trim().toUpperCase() || '';
+const invoiceStatusText = (value?: string) => {
+    const status = value?.toUpperCase();
+    if (status === 'PAID') return 'Hoàn tất';
+    if (status === 'UNPAID' || status === 'WAITING_PAYMENT') return 'Chưa thanh toán';
+    return value || 'Chưa cập nhật';
+};
+const invoiceStatusColor = (value?: string) => value?.toUpperCase() === 'PAID' ? 'green' : 'gold';
+const paymentMethodText = (value?: string) => {
+    const method = value?.toUpperCase();
+    if (method === 'CASH') return 'Tiền mặt';
+    if (method === 'BANK_TRANSFER') return 'Chuyển khoản';
+    if (method === 'VNPAY') return 'VNPay';
+    return value || 'Chưa cập nhật';
+};
 const classOf = (enrollment: IPortalEnrollment) => enrollment.class_id;
 const courseNameOf = (enrollment?: IPortalEnrollment) => enrollment?.class_id?.course_id?.name || 'Chưa gán khóa học';
+type ManagerEnrollment = Omit<IEnrollment, 'student_id' | 'class_id'> & {
+    student_id: IUserSummary | string;
+    class_id: IClassroomWithDetails | string;
+};
 
 const PortalPage = ({ screen }: PortalPageProps) => {
+    const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const user = useAppSelector(state => state.account.user);
     const role = getPortalRole(user.role?.name);
@@ -76,27 +99,34 @@ const PortalPage = ({ screen }: PortalPageProps) => {
     const [managerStudents, setManagerStudents] = useState<IUser[]>([]);
     const [managerCourses, setManagerCourses] = useState<ICourse[]>([]);
     const [managerInvoices, setManagerInvoices] = useState<IInvoice[]>([]);
+    const [managerEnrollments, setManagerEnrollments] = useState<ManagerEnrollment[]>([]);
     const [managerClassrooms, setManagerClassrooms] = useState<IClassroomWithDetails[]>([]);
-    const [selectedClassId, setSelectedClassId] = useState<string>('');
-    const [selectedTeacherId, setSelectedTeacherId] = useState<string>('');
-    const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
     const [courseModalOpen, setCourseModalOpen] = useState(false);
     const [editingCourseId, setEditingCourseId] = useState<string>('');
     const [assignmentUser, setAssignmentUser] = useState<IUser | null>(null);
     const [assignmentClassId, setAssignmentClassId] = useState<string>('');
     const [savingCourse, setSavingCourse] = useState(false);
     const [savingAssignment, setSavingAssignment] = useState(false);
+    const [classroomModalOpen, setClassroomModalOpen] = useState(false);
+    const [editingClassroomId, setEditingClassroomId] = useState('');
+    const [savingClassroom, setSavingClassroom] = useState(false);
+    const [classActionType, setClassActionType] = useState<'teacher' | 'students' | null>(null);
+    const [classActionClassId, setClassActionClassId] = useState('');
+    const [classActionTeacherId, setClassActionTeacherId] = useState('');
+    const [classActionStudentIds, setClassActionStudentIds] = useState<string[]>([]);
     const [loading, setLoading] = useState(screen !== 'profile');
     const [error, setError] = useState('');
     const [enrollments, setEnrollments] = useState<IPortalEnrollment[]>([]);
     const [classes, setClasses] = useState<IClassroomWithDetails[]>([]);
     const [invoices, setInvoices] = useState<IPortalInvoice[]>([]);
     const [payments, setPayments] = useState<IPortalPayment[]>([]);
+    const [paymentInvoice, setPaymentInvoice] = useState<IPortalInvoice | null>(null);
     const [leads, setLeads] = useState<ILead[]>([]);
     const [savingProfile, setSavingProfile] = useState(false);
     const [editingProfile, setEditingProfile] = useState(false);
     const [profileForm] = Form.useForm<{ name: string; currentPassword?: string; newPassword?: string; confirmPassword?: string }>();
     const [courseForm] = Form.useForm<Omit<ICourse, '_id'>>();
+    const [classroomForm] = Form.useForm<Omit<IClassroom, '_id'>>();
 
     useEffect(() => {
         profileForm.setFieldsValue({ name: user.name });
@@ -120,8 +150,13 @@ const PortalPage = ({ screen }: PortalPageProps) => {
                         if (active) setInvoices(toArray<IPortalInvoice>(response));
                     }
                     if (screen === 'payments') {
-                        const response = await callFetchMyPayments();
-                        if (active) setPayments(toArray<IPortalPayment>(response));
+                        const [invoiceResponse, paymentResponse] = await Promise.all([
+                            callFetchMyInvoices(), callFetchMyPayments(),
+                        ]);
+                        if (active) {
+                            setInvoices(toArray<IPortalInvoice>(invoiceResponse));
+                            setPayments(toArray<IPortalPayment>(paymentResponse));
+                        }
                     }
                     if (screen === 'home') {
                         const [enrollmentResponse, invoiceResponse, paymentResponse] = await Promise.all([
@@ -151,17 +186,19 @@ const PortalPage = ({ screen }: PortalPageProps) => {
                         const response = await callFetchUser();
                         if (active) setManagerTeachers(toArray<IUser>(response).filter(item => roleCodeOf(item) === 'TEACHER'));
                     }
-                    if (screen === 'courses' || screen === 'home') {
+                    if (screen === 'courses' || screen === 'classes' || screen === 'home') {
                         const response = await callFetchCourse();
                         if (active) setManagerCourses(toArray<ICourse>(response));
                     }
-                    if (screen === 'classes' || screen === 'home') {
-                        const response = await callFetchClassroom();
+                    if (screen === 'classes' || screen === 'invoices' || screen === 'home') {
+                        const response = await callFetchClassroom('current=1&pageSize=1000');
                         if (active) setManagerClassrooms(toArray<IClassroomWithDetails>(response));
                     }
                     if (screen === 'invoices' || screen === 'home') {
                         const response = await callFetchInvoice();
                         if (active) setManagerInvoices(toArray<IInvoice>(response));
+                        const enrollmentResponse = await callFetchEnrollment('current=1&pageSize=1000&populate=student_id,class_id');
+                        if (active) setManagerEnrollments(toArray<ManagerEnrollment>(enrollmentResponse));
                     }
                     if (screen === 'students' || screen === 'classes' || screen === 'home') {
                         const response = await callFetchUser();
@@ -264,6 +301,48 @@ const PortalPage = ({ screen }: PortalPageProps) => {
         }
     };
 
+    const openClassroomModal = (classroom?: IClassroomWithDetails) => {
+        setEditingClassroomId(classroom?._id || '');
+        classroomForm.setFieldsValue(classroom ? {
+            course_id: classroom.course_id?._id || '',
+            teacher_id: classroom.teacher_id?._id || '',
+            room: classroom.room || '',
+            class_name: classroom.class_name || '',
+            max_student: classroom.max_student || '',
+            start_time: classroom.start_time || '',
+            end_time: classroom.end_time || '',
+            status: classroom.status || 'OPEN',
+        } : { status: 'OPEN' });
+        setClassroomModalOpen(true);
+    };
+
+    const submitClassroom = async (values: Omit<IClassroom, '_id'>) => {
+        setSavingClassroom(true);
+        const response = editingClassroomId
+            ? await callUpdateClassroom(values, editingClassroomId)
+            : await callCreateClassroom(values);
+        setSavingClassroom(false);
+        if (!response?.data) return message.error('Không thể lưu lớp học');
+        const saved = response.data as unknown as IClassroom;
+        if (editingClassroomId) {
+            setManagerClassrooms(current => current.map(item => item._id === editingClassroomId ? { ...item, ...saved, course_id: item.course_id, teacher_id: item.teacher_id } : item));
+        } else {
+            const refreshed = await callFetchClassroom('current=1&pageSize=1000');
+            setManagerClassrooms(toArray<IClassroomWithDetails>(refreshed));
+        }
+        setClassroomModalOpen(false);
+        classroomForm.resetFields();
+        message.success(editingClassroomId ? 'Cập nhật lớp học thành công' : 'Thêm lớp học thành công');
+    };
+
+    const removeClassroom = async (classroomId?: string) => {
+        if (!classroomId) return;
+        const response = await callDeleteClassroom(classroomId);
+        if (!response?.data) return message.error('Không thể xóa lớp học');
+        setManagerClassrooms(current => current.filter(item => item._id !== classroomId));
+        message.success('Đã xóa lớp học');
+    };
+
     const assignUserToClass = async () => {
         if (!assignmentUser?._id || !assignmentClassId) {
             message.warning('Vui lòng chọn lớp học');
@@ -291,6 +370,49 @@ const PortalPage = ({ screen }: PortalPageProps) => {
         setAssignmentUser(null);
         setAssignmentClassId('');
         message.success('Đã thêm vào lớp học');
+    };
+
+    const closeClassAction = () => {
+        setClassActionType(null);
+        setClassActionClassId('');
+        setClassActionTeacherId('');
+        setClassActionStudentIds([]);
+    };
+
+    const submitClassAction = async () => {
+        if (!classActionClassId) return message.warning('Không xác định được lớp học');
+        setSavingAssignment(true);
+        if (classActionType === 'teacher') {
+            if (!classActionTeacherId) {
+                setSavingAssignment(false);
+                return message.warning('Vui lòng chọn giảng viên');
+            }
+            const response = await callUpdateClassroom({ teacher_id: classActionTeacherId }, classActionClassId);
+            setSavingAssignment(false);
+            if (!response?.data) return message.error('Không thể gán giảng viên');
+            const teacher = managerTeachers.find(item => item._id === classActionTeacherId);
+            setManagerClassrooms(current => current.map(item => item._id === classActionClassId
+                ? { ...item, teacher_id: teacher ? { _id: teacher._id, name: teacher.name, email: teacher.email } : item.teacher_id }
+                : item));
+            message.success('Đã gán giảng viên phụ trách');
+            closeClassAction();
+            return;
+        }
+
+        if (!classActionStudentIds.length) {
+            setSavingAssignment(false);
+            return message.warning('Vui lòng chọn ít nhất một học viên');
+        }
+        const responses = await Promise.all(classActionStudentIds.map(studentId => callCreateEnrollment({
+            student_id: studentId,
+            class_id: classActionClassId,
+            register_date: new Date().toISOString(),
+            status: 'WAITING_PAYMENT',
+        })));
+        setSavingAssignment(false);
+        if (responses.some(response => !response?.data)) return message.error('Không thể thêm một hoặc nhiều học viên');
+        message.success('Đã thêm học viên vào lớp');
+        closeClassAction();
     };
 
     const renderContent = () => {
@@ -347,14 +469,113 @@ const PortalPage = ({ screen }: PortalPageProps) => {
         }
 
         if (screen === 'invoices') {
-            const invoiceRows = (role === 'MANAGER' ? managerInvoices : invoices) as IPortalInvoice[];
-            return invoiceRows.length ? <Card className={styles['portal-card']}><Table pagination={false} scroll={{ x: 560 }} columns={[
-                { title: 'Mã hóa đơn', dataIndex: '_id' }, { title: 'Khóa học', render: (_, row: IPortalInvoice | IInvoice) => ('enrollment_id' in row && row.enrollment_id && typeof row.enrollment_id === 'object' ? courseNameOf(row.enrollment_id as IPortalEnrollment) : 'Chung') }, { title: 'Số tiền', render: (_, row: IPortalInvoice | IInvoice) => <b>{moneyText('final_amount' in row ? (row.final_amount ?? row.amount) : row.amount)}</b> }, { title: 'Trạng thái', dataIndex: 'status', render: (value?: string) => <Tag color={value === 'PAID' ? 'green' : 'gold'}>{value || 'Chưa cập nhật'}</Tag> },
+            if (role === 'MANAGER') {
+                const getId = (value?: string | { _id?: string }) => typeof value === 'string' ? value : value?._id || '';
+                const managerInvoiceClassRows = managerClassrooms.map(classroom => {
+                    const classId = classroom._id || '';
+                    const classEnrollments = managerEnrollments.filter(enrollment => getId(enrollment.class_id) === classId);
+                    const classEnrollmentIds = new Set(classEnrollments.map(enrollment => enrollment._id));
+                    const classInvoices = managerInvoices.filter(invoice => classEnrollmentIds.has(invoice.enrollment_id));
+                    return {
+                        ...classroom,
+                        key: classId,
+                        invoiceCount: classInvoices.length,
+                        paidCount: classInvoices.filter(invoice => invoice.status?.toUpperCase() === 'PAID').length,
+                        students: classEnrollments,
+                    };
+                });
+                return managerInvoiceClassRows.length ? <Card className={styles['portal-card']}>
+                    <Table
+                        pagination={false}
+                        scroll={{ x: 820 }}
+                        rowKey="key"
+                        expandable={{
+                            expandedRowRender: (classroom) => <div className={styles['invoice-class-detail']}>
+                                <Descriptions size="small" column={{ xs: 1, sm: 3 }}>
+                                    <Descriptions.Item label="Khóa học">{classroom.course_id?.name || 'Chưa gán khóa học'}</Descriptions.Item>
+                                    <Descriptions.Item label="Giảng viên phụ trách">{classroom.teacher_id?.name || 'Chưa có'}</Descriptions.Item>
+                                    <Descriptions.Item label="Tổng học viên">{classroom.students.length}</Descriptions.Item>
+                                </Descriptions>
+                                {classroom.students.length ? <Table
+                                    size="small"
+                                    pagination={false}
+                                    rowKey={(student) => student._id || `${classroom.key}-${getId(student.student_id)}`}
+                                    columns={[
+                                        { title: 'Học viên', render: (_: unknown, enrollment: ManagerEnrollment) => typeof enrollment.student_id === 'string' ? enrollment.student_id : enrollment.student_id?.name || 'Chưa cập nhật' },
+                                        { title: 'Email', render: (_: unknown, enrollment: ManagerEnrollment) => typeof enrollment.student_id === 'string' ? 'Chưa cập nhật' : enrollment.student_id?.email || 'Chưa cập nhật' },
+                                        { title: 'Trạng thái', dataIndex: 'status', render: (value?: string) => <Tag color={value === 'STUDYING' ? 'green' : 'gold'}>{value || 'Chưa cập nhật'}</Tag> },
+                                    ]}
+                                    dataSource={classroom.students}
+                                /> : <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Chưa có học viên trong lớp" />}
+                            </div>,
+                        }}
+                        columns={[
+                            { title: 'Lớp học', dataIndex: 'class_name', render: (value?: string) => value || 'Lớp chưa đặt tên' },
+                            { title: 'Khóa học', render: (_: unknown, classroom: IClassroomWithDetails) => classroom.course_id?.name || 'Chưa gán khóa học' },
+                            { title: 'Giảng viên phụ trách', render: (_: unknown, classroom: IClassroomWithDetails) => classroom.teacher_id?.name || 'Chưa có' },
+                            { title: 'Học viên', render: (_: unknown, classroom: typeof managerInvoiceClassRows[number]) => classroom.students.length },
+                            { title: 'Hóa đơn', render: (_: unknown, classroom: typeof managerInvoiceClassRows[number]) => `${classroom.paidCount}/${classroom.invoiceCount} đã trả` },
+                        ]}
+                        dataSource={managerInvoiceClassRows}
+                    />
+                </Card> : <Empty description="Chưa có lớp học để hiển thị hóa đơn" />;
+            }
+            const invoiceRows = invoices;
+            return invoiceRows.length ? <Card className={styles['portal-card']} title="Các khoản cần thanh toán"><Table pagination={false} scroll={{ x: 700 }} columns={[
+                { title: 'Mã hóa đơn', dataIndex: '_id' },
+                { title: 'Khóa học', render: (_: unknown, row: IPortalInvoice | IInvoice) => 'enrollment_id' in row && typeof row.enrollment_id === 'object' ? courseNameOf(row.enrollment_id as IPortalEnrollment) : 'Chung' },
+                { title: 'Lớp học', render: (_: unknown, row: IPortalInvoice | IInvoice) => 'enrollment_id' in row && typeof row.enrollment_id === 'object' ? row.enrollment_id?.class_id?.class_name || 'Chưa cập nhật' : 'Chưa cập nhật' },
+                { title: 'Số tiền cần trả', render: (_: unknown, row: IPortalInvoice | IInvoice) => <b>{moneyText('final_amount' in row ? (row.final_amount ?? row.amount) : row.amount)}</b> },
+                { title: 'Trạng thái', dataIndex: 'status', render: (value?: string) => <Tag color={invoiceStatusColor(value)}>{invoiceStatusText(value)}</Tag> },
             ]} dataSource={invoiceRows} rowKey="_id" /></Card> : <Empty description="Chưa có hóa đơn" />;
         }
 
-        if (screen === 'payments') return payments.length ? <Card className={styles['portal-card']}><Table pagination={false} scroll={{ x: 560 }} columns={[
-            { title: 'Mã giao dịch', dataIndex: '_id' }, { title: 'Khóa học', render: (_, row: IPortalPayment) => courseNameOf(row.invoice_id?.enrollment_id) }, { title: 'Phương thức', dataIndex: 'payment_method', render: (value?: string) => value || 'Chưa cập nhật' }, { title: 'Ngày thanh toán', dataIndex: 'payment_date', render: (value?: string) => dateText(value) },
+        if (screen === 'payments' && role === 'STUDENT') return <>
+            <Card className={styles['portal-card']} title="Hóa đơn của tôi">
+                {invoices.length ? <Table pagination={false} scroll={{ x: 780 }} rowKey="_id" columns={[
+                    { title: 'Khóa học', render: (_: unknown, row: IPortalInvoice) => courseNameOf(row) },
+                    { title: 'Lớp học', render: (_: unknown, row: IPortalInvoice) => row.enrollment_id?.class_id?.class_name || 'Chưa cập nhật' },
+                    { title: 'Số tiền', render: (_: unknown, row: IPortalInvoice) => <b>{moneyText(row.final_amount ?? row.amount)}</b> },
+                    { title: 'Trạng thái', dataIndex: 'status', render: (value?: string) => <Tag color={invoiceStatusColor(value)}>{invoiceStatusText(value)}</Tag> },
+                    { title: 'Thao tác', render: (_: unknown, row: IPortalInvoice) => row.status?.toUpperCase() === 'PAID'
+                        ? <Tag color="green">Hoàn tất</Tag>
+                        : <Button type="primary" onClick={() => setPaymentInvoice(row)}>Thanh toán</Button> },
+                ]} dataSource={invoices} /> : <Empty description="Bạn chưa có hóa đơn" />}
+            </Card>
+            <Card className={styles['portal-card']} title="Lịch sử thanh toán" style={{ marginTop: 18 }}>
+                {payments.length ? <Table pagination={false} scroll={{ x: 760 }} rowKey="_id" columns={[
+                    { title: 'Mã giao dịch', dataIndex: '_id' },
+                    { title: 'Khóa học', render: (_: unknown, row: IPortalPayment) => courseNameOf(row.invoice_id?.enrollment_id) },
+                    { title: 'Lớp học', render: (_: unknown, row: IPortalPayment) => row.invoice_id?.enrollment_id?.class_id?.class_name || 'Chưa cập nhật' },
+                    { title: 'Số tiền', render: (_: unknown, row: IPortalPayment) => moneyText(row.invoice_id?.final_amount ?? row.invoice_id?.amount) },
+                    { title: 'Phương thức', dataIndex: 'payment_method', render: (value?: string) => paymentMethodText(value) },
+                    { title: 'Ngày thanh toán', dataIndex: 'payment_date', render: (value?: string) => dateText(value) },
+                    { title: 'Trạng thái', render: () => <Tag color="green">Hoàn tất</Tag> },
+                ]} dataSource={payments} /> : <Empty description="Chưa có giao dịch thanh toán" />}
+            </Card>
+            <Modal title="Thông tin thanh toán" open={Boolean(paymentInvoice)} footer={null} onCancel={() => setPaymentInvoice(null)}>
+                <Descriptions column={1}>
+                    <Descriptions.Item label="Khóa học">{paymentInvoice ? courseNameOf(paymentInvoice) : ''}</Descriptions.Item>
+                    <Descriptions.Item label="Lớp học">{paymentInvoice?.enrollment_id?.class_id?.class_name || 'Chưa cập nhật'}</Descriptions.Item>
+                    <Descriptions.Item label="Phòng học">{paymentInvoice?.enrollment_id?.class_id?.room || 'Chưa cập nhật'}</Descriptions.Item>
+                    <Descriptions.Item label="Số tiền cần thanh toán"><b>{paymentInvoice ? moneyText(paymentInvoice.final_amount ?? paymentInvoice.amount) : ''}</b></Descriptions.Item>
+                </Descriptions>
+                <div className={styles['payment-qr-placeholder']}>
+                    <span>QR</span>
+                    <p>Khu vực hiển thị mã QR thanh toán</p>
+                </div>
+                <Alert type="info" showIcon message="Mã QR sẽ được tích hợp tại đây." />
+            </Modal>
+        </>;
+
+        if (screen === 'payments') return payments.length ? <Card className={styles['portal-card']} title="Lịch sử thanh toán"><Table pagination={false} scroll={{ x: 760 }} columns={[
+            { title: 'Mã giao dịch', dataIndex: '_id' },
+            { title: 'Khóa học', render: (_: unknown, row: IPortalPayment) => courseNameOf(row.invoice_id?.enrollment_id) },
+            { title: 'Lớp học', render: (_: unknown, row: IPortalPayment) => row.invoice_id?.enrollment_id?.class_id?.class_name || 'Chưa cập nhật' },
+            { title: 'Số tiền', render: (_: unknown, row: IPortalPayment) => moneyText(row.invoice_id?.final_amount ?? row.invoice_id?.amount) },
+            { title: 'Phương thức', dataIndex: 'payment_method', render: (value?: string) => paymentMethodText(value) },
+            { title: 'Ngày thanh toán', dataIndex: 'payment_date', render: (value?: string) => dateText(value) },
+            { title: 'Trạng thái', render: () => <Tag color="green">Hoàn tất</Tag> },
         ]} dataSource={payments} rowKey="_id" /></Card> : <Empty description="Chưa có giao dịch thanh toán" />;
 
         if (screen === 'students') {
@@ -388,10 +609,13 @@ const PortalPage = ({ screen }: PortalPageProps) => {
 
         if (screen === 'classes') {
             if (role === 'MANAGER') {
-                return managerClassrooms.length ? <div className={styles['schedule-list']}>
-                    {managerClassrooms.map(item => {
-                        const teacherOptions = managerTeachers.map(user => ({ label: user.name, value: user._id || '' })).filter(option => option.value);
-                        const studentOptions = managerStudents.map(user => ({ label: `${user.name} - ${user.email}`, value: user._id || '' })).filter(option => option.value);
+                return <>
+                    <div className={styles['portal-toolbar']}>
+                        <div><h2>Danh sách lớp học</h2><p>Quản lý lớp, khóa học và giảng viên phụ trách.</p></div>
+                        <Button type="primary" icon={<PlusOutlined />} onClick={() => openClassroomModal()}>Thêm lớp học</Button>
+                    </div>
+                    {managerClassrooms.length ? <div className={styles['schedule-list']}>
+                        {managerClassrooms.map(item => {
                         return <Card key={item._id} className={styles['portal-card']}>
                             <div className={styles['schedule-row']}>
                                 <div className={styles['schedule-date']}><TeamOutlined /></div>
@@ -401,38 +625,17 @@ const PortalPage = ({ screen }: PortalPageProps) => {
                                     <p>Giảng viên phụ trách: {item.teacher_id?.name || 'Chưa có'}</p>
                                 </div>
                                 <div className={styles['manager-class-actions']}>
-                                    <Select value={selectedClassId === item._id ? selectedTeacherId || item.teacher_id?._id || undefined : item.teacher_id?._id || undefined} onChange={(value) => { setSelectedTeacherId(String(value)); setSelectedClassId(String(item._id)); }} placeholder="Chọn giảng viên" options={teacherOptions} style={{ width: '100%' }} />
-                                    <Button type="primary" size="small" onClick={async () => {
-                                        const classId = String(item._id);
-                                        const teacherId = selectedClassId === classId ? selectedTeacherId : item.teacher_id?._id;
-                                        if (!teacherId) return message.warning('Vui lòng chọn giảng viên');
-                                        const response = await callUpdateClassroom({ teacher_id: teacherId }, classId);
-                                        if (response?.data) {
-                                            message.success('Cập nhật giảng viên phụ trách thành công');
-                                            setSelectedClassId('');
-                                            setSelectedTeacherId('');
-                                            const refreshed = await callFetchClassroom();
-                                            setManagerClassrooms(toArray<IClassroomWithDetails>(refreshed));
-                                        }
-                                    }}>Gán giảng viên</Button>
-                                    <Select mode="multiple" placeholder="Chọn học viên để thêm" options={studentOptions} value={selectedClassId === item._id ? selectedStudentIds : []} onChange={(values) => { setSelectedClassId(String(item._id)); setSelectedStudentIds(values); }} style={{ width: '100%' }} maxTagCount="responsive" />
-                                    <Button size="small" onClick={async () => {
-                                        if (!selectedStudentIds.length || selectedClassId !== item._id) return message.warning('Vui lòng chọn học viên để thêm');
-                                        await Promise.all(selectedStudentIds.map(studentId => callCreateEnrollment({
-                                            student_id: studentId,
-                                            class_id: String(item._id),
-                                            register_date: new Date().toISOString(),
-                                            status: 'WAITING_PAYMENT',
-                                        })));
-                                        message.success('Đã thêm học viên vào lớp');
-                                        setSelectedStudentIds([]);
-                                        setSelectedClassId('');
-                                    }}>Thêm học viên</Button>
+                                    <Button icon={<TeamOutlined />} onClick={() => navigate(`/portal/classes/${item._id}`)}>Xem chi tiết lớp</Button>
+                                    <Button icon={<EditOutlined />} onClick={() => openClassroomModal(item)}>Sửa lớp</Button>
+                                    <Popconfirm title="Xóa lớp học này?" description="Thao tác này không xóa các học viên đã đăng ký." okText="Xóa" cancelText="Hủy" onConfirm={() => removeClassroom(item._id)}>
+                                        <Button danger icon={<DeleteOutlined />}>Xóa lớp</Button>
+                                    </Popconfirm>
                                 </div>
                             </div>
                         </Card>;
-                    })}
-                </div> : <Empty description="Chưa có lớp học" />;
+                        })}
+                    </div> : <Empty description="Chưa có lớp học" />}
+                </>;
             }
             return classRows.length ? <Card className={styles['portal-card']}><Table pagination={false} scroll={{ x: 640 }} columns={[
                 { title: 'Lớp học', dataIndex: 'name' }, { title: 'Khóa học', dataIndex: 'course' }, { title: 'Phòng', dataIndex: 'room' }, { title: 'Thời gian', dataIndex: 'time' }, { title: 'Trạng thái', dataIndex: 'status', render: (value: string) => <Tag color="green">{value}</Tag> },
@@ -464,6 +667,59 @@ const PortalPage = ({ screen }: PortalPageProps) => {
             <Col xs={24} sm={12} lg={6}><Card><Statistic title="Thanh toán" value={payments.length} prefix={<CreditCardOutlined />} /></Card></Col>
         </Row>}
         <section className={styles['portal-content']}>{renderContent()}</section>
+        <Modal
+            title={editingClassroomId ? 'Sửa lớp học' : 'Thêm lớp học'}
+            open={classroomModalOpen}
+            destroyOnClose
+            width={720}
+            confirmLoading={savingClassroom}
+            okText={editingClassroomId ? 'Lưu thay đổi' : 'Thêm lớp học'}
+            cancelText="Hủy"
+            onCancel={() => setClassroomModalOpen(false)}
+            onOk={() => classroomForm.submit()}
+        >
+            <Form form={classroomForm} layout="vertical" onFinish={submitClassroom}>
+                <Row gutter={12}>
+                    <Col xs={24} sm={12}><Form.Item name="class_name" label="Tên lớp" rules={[{ required: true, message: 'Vui lòng nhập tên lớp' }]}><Input placeholder="Ví dụ: React cơ bản K01" /></Form.Item></Col>
+                    <Col xs={24} sm={12}><Form.Item name="room" label="Phòng học" rules={[{ required: true, message: 'Vui lòng nhập phòng học' }]}><Input placeholder="Phòng A101" /></Form.Item></Col>
+                </Row>
+                <Row gutter={12}>
+                    <Col xs={24} sm={12}><Form.Item name="course_id" label="Khóa học" rules={[{ required: true, message: 'Vui lòng chọn khóa học' }]}><Select showSearch optionFilterProp="label" placeholder="Chọn khóa học" options={managerCourses.map(course => ({ label: course.name, value: course._id || '' })).filter(option => option.value)} /></Form.Item></Col>
+                    <Col xs={24} sm={12}><Form.Item name="teacher_id" label="Giảng viên" rules={[{ required: true, message: 'Vui lòng chọn giảng viên' }]}><Select showSearch optionFilterProp="label" placeholder="Chọn giảng viên" options={managerTeachers.map(teacher => ({ label: `${teacher.name} - ${teacher.email}`, value: teacher._id || '' })).filter(option => option.value)} /></Form.Item></Col>
+                </Row>
+                <Row gutter={12}>
+                    <Col xs={24} sm={8}><Form.Item name="max_student" label="Số học viên tối đa" rules={[{ required: true, message: 'Vui lòng nhập sĩ số' }]}><Input inputMode="numeric" placeholder="30" /></Form.Item></Col>
+                    <Col xs={24} sm={8}><Form.Item name="start_time" label="Bắt đầu" rules={[{ required: true, message: 'Vui lòng nhập giờ bắt đầu' }]}><Input placeholder="18:00" /></Form.Item></Col>
+                    <Col xs={24} sm={8}><Form.Item name="end_time" label="Kết thúc" rules={[{ required: true, message: 'Vui lòng nhập giờ kết thúc' }]}><Input placeholder="20:00" /></Form.Item></Col>
+                </Row>
+                <Form.Item name="status" label="Trạng thái"><Select options={[{ label: 'Đang mở', value: 'OPEN' }, { label: 'Đã hoàn thành', value: 'COMPLETED' }, { label: 'Đã hủy', value: 'CANCELLED' }]} /></Form.Item>
+            </Form>
+        </Modal>
+        <Modal
+            title={classActionType === 'teacher' ? 'Gán giảng viên phụ trách' : 'Thêm học viên vào lớp'}
+            open={Boolean(classActionType)}
+            confirmLoading={savingAssignment}
+            okText="Xác nhận"
+            cancelText="Hủy"
+            onCancel={closeClassAction}
+            onOk={submitClassAction}
+        >
+            {classActionType === 'teacher' ? <Select
+                value={classActionTeacherId || undefined}
+                onChange={setClassActionTeacherId}
+                placeholder="Chọn giảng viên"
+                options={managerTeachers.map(teacher => ({ label: `${teacher.name} - ${teacher.email}`, value: teacher._id || '' })).filter(option => option.value)}
+                style={{ width: '100%' }}
+            /> : <Select
+                mode="multiple"
+                value={classActionStudentIds}
+                onChange={setClassActionStudentIds}
+                placeholder="Chọn một hoặc nhiều học viên"
+                options={managerStudents.map(student => ({ label: `${student.name} - ${student.email}`, value: student._id || '' })).filter(option => option.value)}
+                maxTagCount="responsive"
+                style={{ width: '100%' }}
+            />}
+        </Modal>
         <Modal
             title={editingCourseId ? 'Sửa khóa học' : 'Thêm khóa học'}
             open={courseModalOpen}

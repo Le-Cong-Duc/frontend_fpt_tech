@@ -502,6 +502,24 @@
 .portal-loading { display: grid; min-height: 220px; place-items: center; }
 .portal-card { border-color: #e4ebef; box-shadow: 0 7px 20px rgba(28, 49, 74, .05); }
 .portal-card p { color: #6f7d8c; }
+.class-detail-grid { display: grid; grid-template-columns: minmax(0, 2fr) minmax(220px, 1fr); gap: 18px; margin: 22px 0; }
+.class-detail-summary { display: flex; align-items: baseline; gap: 8px; margin: 8px 0 18px; }
+.class-detail-summary strong { color: #1f6f78; font-size: 38px; line-height: 1; }
+.class-detail-summary span { color: #718092; }
+.payment-qr-placeholder {
+    display: grid;
+    min-height: 180px;
+    margin: 18px 0;
+    padding: 24px;
+    place-items: center;
+    color: #718092;
+    background: #f7fafb;
+    border: 1px dashed #9db5bb;
+    border-radius: 10px;
+    text-align: center;
+}
+.payment-qr-placeholder span { color: #1f6f78; font-size: 42px; font-weight: 700; line-height: 1; }
+.payment-qr-placeholder p { margin: 8px 0 0; }
 .table-actions { display: flex; gap: 8px; }
 .manager-class-actions {
     display: flex;
@@ -544,6 +562,7 @@
 @media (max-width: 600px) {
     .portal-hero { padding: 26px 22px; }
     .schedule-row { align-items: flex-start; flex-wrap: wrap; }
+    .class-detail-grid { grid-template-columns: 1fr; }
     .manager-class-actions {
         width: 100%;
         min-width: 0;
