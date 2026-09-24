@@ -40,9 +40,20 @@ import ConsultantCourses from './pages/client/consultant/ConsultantCourses';
 import ConsultantEnrollments from './pages/client/consultant/ConsultantEnrollments';
 import ConsultantFollowUp from './pages/client/consultant/ConsultantFollowUp';
 import ConsultantChat from './pages/client/consultant/ConsultantChat';
+import ManagerDashboard from './pages/client/manager/ManagerDashboard';
+import ManagerClasses from './pages/client/manager/ManagerClasses';
+import ManagerTeachers from './pages/client/manager/ManagerTeachers';
+import ManagerStudents from './pages/client/manager/ManagerStudents';
+import ManagerCourses from './pages/client/manager/ManagerCourses';
+import ManagerSchedule from './pages/client/manager/ManagerSchedule';
 import ClientDashboard from './pages/client/dashboard/ClientDashboard';
 import { getPortalRole, isBackofficeRole } from './config/portal';
 import ClientLayout from './pages/client/layout/ClientLayout';
+import StudentCourses from './pages/client/student/StudentCourses';
+import StudentSchedule from './pages/client/student/StudentSchedule';
+import StudentInvoices from './pages/client/student/StudentInvoices';
+import StudentPayments from './pages/client/student/StudentPayments';
+import StudentProfile from './pages/client/student/StudentProfile';
 
 const BackendModulePage = ({ title, endpoint }: { title: string; endpoint: string }) => (
     <div style={{ padding: 24 }}>
@@ -68,6 +79,22 @@ const ConsultantRoute = ({ children }: { children: ReactNode }) => {
     if (isLoading) return <Loading />;
     if (!isAuthenticated) return <Navigate to="/login" replace />;
     if (getPortalRole(user.role?.name) !== 'CONSULTANT') return <NotPermitted />;
+    return <>{children}</>;
+};
+
+const ManagerRoute = ({ children }: { children: ReactNode }) => {
+    const { isAuthenticated, isLoading, user } = useAppSelector(state => state.account);
+    if (isLoading) return <Loading />;
+    if (!isAuthenticated) return <Navigate to="/login?callback=/client/manager" replace />;
+    if (getPortalRole(user.role?.name) !== 'MANAGER') return <NotPermitted />;
+    return <>{children}</>;
+};
+
+const StudentRoute = ({ children }: { children: ReactNode }) => {
+    const { isAuthenticated, isLoading, user } = useAppSelector(state => state.account);
+    if (isLoading) return <Loading />;
+    if (!isAuthenticated) return <Navigate to="/login?callback=/client/student" replace />;
+    if (getPortalRole(user.role?.name) !== 'STUDENT') return <NotPermitted />;
     return <>{children}</>;
 };
 
@@ -118,6 +145,19 @@ export default function App() {
         },
         { path: '/courses/:id', element: <LayoutApp><LayoutClient /></LayoutApp>, errorElement: <NotFound />, children: [{ index: true, element: <CourseDetailPage /> }] },
         { path: '/client', element: <LayoutApp><ClientLayout /></LayoutApp>, errorElement: <NotFound />, children: [{ index: true, element: <ClientRoute><ClientDashboard /></ClientRoute> }] },
+        {
+            path: '/client/student',
+            element: <LayoutApp><ClientLayout /></LayoutApp>,
+            errorElement: <NotFound />,
+            children: [
+                { index: true, element: <StudentRoute><ClientDashboard /></StudentRoute> },
+                { path: 'courses', element: <StudentRoute><StudentCourses /></StudentRoute> },
+                { path: 'schedule', element: <StudentRoute><StudentSchedule /></StudentRoute> },
+                { path: 'invoices', element: <StudentRoute><StudentInvoices /></StudentRoute> },
+                { path: 'payments', element: <StudentRoute><StudentPayments /></StudentRoute> },
+                { path: 'profile', element: <StudentRoute><StudentProfile /></StudentRoute> },
+            ],
+        },
         {
             path: '/portal',
             element: <LayoutApp><ClientLayout /></LayoutApp>,
@@ -182,6 +222,20 @@ export default function App() {
                 { path: 'follow-up', element: <ConsultantRoute><ConsultantFollowUp /></ConsultantRoute> },
                 { path: 'chat', element: <ConsultantRoute><ConsultantChat /></ConsultantRoute> },
                 { path: 'profile', element: <ConsultantRoute><PortalPage screen="profile" /></ConsultantRoute> },
+            ],
+        },
+        {
+            path: '/client/manager',
+            element: <LayoutApp><ClientLayout /></LayoutApp>,
+            errorElement: <NotFound />,
+            children: [
+                { index: true, element: <ManagerRoute><ManagerDashboard /></ManagerRoute> },
+                { path: 'classes', element: <ManagerRoute><ManagerClasses /></ManagerRoute> },
+                { path: 'teachers', element: <ManagerRoute><ManagerTeachers /></ManagerRoute> },
+                { path: 'students', element: <ManagerRoute><ManagerStudents /></ManagerRoute> },
+                { path: 'courses', element: <ManagerRoute><ManagerCourses /></ManagerRoute> },
+                { path: 'schedule', element: <ManagerRoute><ManagerSchedule /></ManagerRoute> },
+                { path: 'profile', element: <ManagerRoute><PortalPage screen="profile" /></ManagerRoute> },
             ],
         },
         { path: '/login', element: <LoginPage /> },

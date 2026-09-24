@@ -145,6 +145,7 @@ export interface IUser {
     age: number;
     gender: string;
     address: string;
+    phone?: string;
     role?: {
         _id: string;
         name: string;
