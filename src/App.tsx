@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { createBrowserRouter, Outlet, RouterProvider, useLocation } from 'react-router-dom';
-import { useAppDispatch } from '@/redux/hooks';
+import { createBrowserRouter, Navigate, Outlet, RouterProvider, useLocation } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import NotFound from 'components/share/not.found';
 import LoginPage from 'pages/auth/login';
 import RegisterPage from 'pages/auth/register';
@@ -26,6 +26,23 @@ import CourseDetailPage from './pages/course/detail';
 import PortalPage from './pages/portal';
 import ClassDetailPage from './pages/portal/class-detail';
 import PortalRoute from './components/client/portal-route';
+import Loading from './components/share/loading';
+import NotPermitted from './components/share/protected-route.ts/not-permitted';
+import { isAccountantRole } from './config/portal';
+import AccountantDashboard from './pages/client/accountant/AccountantDashboard';
+import AccountantTuition from './pages/client/accountant/AccountantTuition';
+import AccountantInvoices from './pages/client/accountant/AccountantInvoices';
+import AccountantPayments from './pages/client/accountant/AccountantPayments';
+import AccountantRevenue from './pages/client/accountant/AccountantRevenue';
+import ConsultantDashboard from './pages/client/consultant/ConsultantDashboard';
+import ConsultantCustomers from './pages/client/consultant/ConsultantCustomers';
+import ConsultantCourses from './pages/client/consultant/ConsultantCourses';
+import ConsultantEnrollments from './pages/client/consultant/ConsultantEnrollments';
+import ConsultantFollowUp from './pages/client/consultant/ConsultantFollowUp';
+import ConsultantChat from './pages/client/consultant/ConsultantChat';
+import ClientDashboard from './pages/client/dashboard/ClientDashboard';
+import { getPortalRole, isBackofficeRole } from './config/portal';
+import ClientLayout from './pages/client/layout/ClientLayout';
 
 const BackendModulePage = ({ title, endpoint }: { title: string; endpoint: string }) => (
     <div style={{ padding: 24 }}>
@@ -37,6 +54,31 @@ const BackendModulePage = ({ title, endpoint }: { title: string; endpoint: strin
 const ProtectedModuleRoute = ({ children }: { children: ReactNode }) => (
     <ProtectedRoute>{children}</ProtectedRoute>
 );
+
+const AccountantRoute = ({ children }: { children: ReactNode }) => {
+    const { isAuthenticated, isLoading, user } = useAppSelector(state => state.account);
+    if (isLoading) return <Loading />;
+    if (!isAuthenticated) return <Navigate to="/login" replace />;
+    if (!isAccountantRole(user.role?.name)) return <NotPermitted />;
+    return <>{children}</>;
+};
+
+const ConsultantRoute = ({ children }: { children: ReactNode }) => {
+    const { isAuthenticated, isLoading, user } = useAppSelector(state => state.account);
+    if (isLoading) return <Loading />;
+    if (!isAuthenticated) return <Navigate to="/login" replace />;
+    if (getPortalRole(user.role?.name) !== 'CONSULTANT') return <NotPermitted />;
+    return <>{children}</>;
+};
+
+const ClientRoute = ({ children }: { children: ReactNode }) => {
+    const { isAuthenticated, isLoading, user } = useAppSelector(state => state.account);
+    if (isLoading) return <Loading />;
+    if (!isAuthenticated) return <Navigate to="/login?callback=/client" replace />;
+    if (isBackofficeRole(user.role?.name)) return <Navigate to="/admin" replace />;
+    if (!['STUDENT', 'TEACHER', 'CONSULTANT', 'ACCOUNTANT', 'MANAGER'].includes(getPortalRole(user.role?.name))) return <NotPermitted />;
+    return <>{children}</>;
+};
 
 const LayoutClient = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -75,9 +117,10 @@ export default function App() {
             children: [{ index: true, element: <HomePage /> }],
         },
         { path: '/courses/:id', element: <LayoutApp><LayoutClient /></LayoutApp>, errorElement: <NotFound />, children: [{ index: true, element: <CourseDetailPage /> }] },
+        { path: '/client', element: <LayoutApp><ClientLayout /></LayoutApp>, errorElement: <NotFound />, children: [{ index: true, element: <ClientRoute><ClientDashboard /></ClientRoute> }] },
         {
             path: '/portal',
-            element: <LayoutApp><LayoutClient /></LayoutApp>,
+            element: <LayoutApp><ClientLayout /></LayoutApp>,
             errorElement: <NotFound />,
             children: [
                 { index: true, element: <PortalRoute><PortalPage screen="home" /></PortalRoute> },
@@ -112,6 +155,33 @@ export default function App() {
                 { path: 'conversations', element: <ProtectedModuleRoute><BackendModulePage title="Conversations" endpoint="/conversations" /></ProtectedModuleRoute> },
                 { path: 'messages', element: <ProtectedModuleRoute><BackendModulePage title="Messages" endpoint="/messages" /></ProtectedModuleRoute> },
                 { path: 'notifications', element: <ProtectedModuleRoute><BackendModulePage title="Notifications" endpoint="/notifications" /></ProtectedModuleRoute> },
+            ],
+        },
+        {
+            path: '/client/accountant',
+            element: <LayoutApp><ClientLayout /></LayoutApp>,
+            errorElement: <NotFound />,
+            children: [
+                { index: true, element: <AccountantRoute><AccountantDashboard /></AccountantRoute> },
+                { path: 'tuition', element: <AccountantRoute><AccountantTuition /></AccountantRoute> },
+                { path: 'invoices', element: <AccountantRoute><AccountantInvoices /></AccountantRoute> },
+                { path: 'payments', element: <AccountantRoute><AccountantPayments /></AccountantRoute> },
+                { path: 'revenue', element: <AccountantRoute><AccountantRevenue /></AccountantRoute> },
+                { path: 'profile', element: <AccountantRoute><PortalPage screen="profile" /></AccountantRoute> },
+            ],
+        },
+        {
+            path: '/client/consultant',
+            element: <LayoutApp><ClientLayout /></LayoutApp>,
+            errorElement: <NotFound />,
+            children: [
+                { index: true, element: <ConsultantRoute><ConsultantDashboard /></ConsultantRoute> },
+                { path: 'customers', element: <ConsultantRoute><ConsultantCustomers /></ConsultantRoute> },
+                { path: 'courses', element: <ConsultantRoute><ConsultantCourses /></ConsultantRoute> },
+                { path: 'enrollments', element: <ConsultantRoute><ConsultantEnrollments /></ConsultantRoute> },
+                { path: 'follow-up', element: <ConsultantRoute><ConsultantFollowUp /></ConsultantRoute> },
+                { path: 'chat', element: <ConsultantRoute><ConsultantChat /></ConsultantRoute> },
+                { path: 'profile', element: <ConsultantRoute><PortalPage screen="profile" /></ConsultantRoute> },
             ],
         },
         { path: '/login', element: <LoginPage /> },

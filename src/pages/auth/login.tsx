@@ -6,12 +6,13 @@ import { useDispatch } from 'react-redux';
 import { setUserLoginInfo } from '@/redux/slice/accountSlide';
 import styles from 'styles/auth.module.scss';
 import { useAppSelector } from '@/redux/hooks';
+import { isBackofficeRole } from '@/config/portal';
 
 const LoginPage = () => {
     const navigate = useNavigate();
     const [isSubmit, setIsSubmit] = useState(false);
     const dispatch = useDispatch();
-    const isAuthenticated = useAppSelector(state => state.account.isAuthenticated);
+    const { isAuthenticated, user } = useAppSelector(state => state.account);
 
     let location = useLocation();
     let params = new URLSearchParams(location.search);
@@ -20,8 +21,7 @@ const LoginPage = () => {
     useEffect(() => {
         //đã login => redirect to '/'
         if (isAuthenticated) {
-            // navigate('/');
-            window.location.href = '/';
+            window.location.href = isBackofficeRole(user.role?.name) ? '/admin' : '/client';
         }
     }, [])
 
@@ -34,7 +34,7 @@ const LoginPage = () => {
             localStorage.setItem('access_token', res.data.access_token);
             dispatch(setUserLoginInfo(res.data.user))
             message.success('Đăng nhập tài khoản thành công!');
-            window.location.href = callback ? callback : '/';
+            window.location.href = callback ? callback : (isBackofficeRole(res.data.user.role?.name) ? '/admin' : '/client');
         } else {
             notification.error({
                 message: "Có lỗi xảy ra",

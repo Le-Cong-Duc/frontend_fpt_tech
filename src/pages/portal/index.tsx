@@ -33,7 +33,7 @@ type PortalScreen = 'home' | 'my-courses' | 'classes' | 'schedule' | 'invoices' 
 
 interface PortalPageProps { screen: PortalScreen; }
 
-const roleLabel: Record<PortalRole, string> = { STUDENT: 'Học viên', TEACHER: 'Giảng viên', CONSULTANT: 'Tư vấn viên', MANAGER: 'Quản lý' };
+const roleLabel: Record<PortalRole, string> = { STUDENT: 'Học viên', TEACHER: 'Giảng viên', CONSULTANT: 'Tư vấn viên', MANAGER: 'Quản lý', ACCOUNTANT: 'Kế toán' };
 
 const screenTitle: Record<PortalScreen, { title: string; description: string }> = {
     home: { title: 'Không gian học tập', description: 'Theo dõi các hoạt động và công việc của bạn.' },
@@ -537,9 +537,11 @@ const PortalPage = ({ screen }: PortalPageProps) => {
                     { title: 'Lớp học', render: (_: unknown, row: IPortalInvoice) => row.enrollment_id?.class_id?.class_name || 'Chưa cập nhật' },
                     { title: 'Số tiền', render: (_: unknown, row: IPortalInvoice) => <b>{moneyText(row.final_amount ?? row.amount)}</b> },
                     { title: 'Trạng thái', dataIndex: 'status', render: (value?: string) => <Tag color={invoiceStatusColor(value)}>{invoiceStatusText(value)}</Tag> },
-                    { title: 'Thao tác', render: (_: unknown, row: IPortalInvoice) => row.status?.toUpperCase() === 'PAID'
-                        ? <Tag color="green">Hoàn tất</Tag>
-                        : <Button type="primary" onClick={() => setPaymentInvoice(row)}>Thanh toán</Button> },
+                    {
+                        title: 'Thao tác', render: (_: unknown, row: IPortalInvoice) => row.status?.toUpperCase() === 'PAID'
+                            ? <Tag color="green">Hoàn tất</Tag>
+                            : <Button type="primary" onClick={() => setPaymentInvoice(row)}>Thanh toán</Button>
+                    },
                 ]} dataSource={invoices} /> : <Empty description="Bạn chưa có hóa đơn" />}
             </Card>
             <Card className={styles['portal-card']} title="Lịch sử thanh toán" style={{ marginTop: 18 }}>
@@ -616,23 +618,23 @@ const PortalPage = ({ screen }: PortalPageProps) => {
                     </div>
                     {managerClassrooms.length ? <div className={styles['schedule-list']}>
                         {managerClassrooms.map(item => {
-                        return <Card key={item._id} className={styles['portal-card']}>
-                            <div className={styles['schedule-row']}>
-                                <div className={styles['schedule-date']}><TeamOutlined /></div>
-                                <div style={{ flex: 1 }}>
-                                    <h3>{item.class_name || 'Lớp chưa đặt tên'}</h3>
-                                    <p>{item.course_id?.name || 'Chưa gán khóa học'} · {item.room || 'Chưa cập nhật'} · {item.start_time || 'Chưa cập nhật'} – {item.end_time || 'Chưa cập nhật'}</p>
-                                    <p>Giảng viên phụ trách: {item.teacher_id?.name || 'Chưa có'}</p>
+                            return <Card key={item._id} className={styles['portal-card']}>
+                                <div className={styles['schedule-row']}>
+                                    <div className={styles['schedule-date']}><TeamOutlined /></div>
+                                    <div style={{ flex: 1 }}>
+                                        <h3>{item.class_name || 'Lớp chưa đặt tên'}</h3>
+                                        <p>{item.course_id?.name || 'Chưa gán khóa học'} · {item.room || 'Chưa cập nhật'} · {item.start_time || 'Chưa cập nhật'} – {item.end_time || 'Chưa cập nhật'}</p>
+                                        <p>Giảng viên phụ trách: {item.teacher_id?.name || 'Chưa có'}</p>
+                                    </div>
+                                    <div className={styles['manager-class-actions']}>
+                                        <Button icon={<TeamOutlined />} onClick={() => navigate(`/portal/classes/${item._id}`)}>Xem chi tiết lớp</Button>
+                                        <Button icon={<EditOutlined />} onClick={() => openClassroomModal(item)}>Sửa lớp</Button>
+                                        <Popconfirm title="Xóa lớp học này?" description="Thao tác này không xóa các học viên đã đăng ký." okText="Xóa" cancelText="Hủy" onConfirm={() => removeClassroom(item._id)}>
+                                            <Button danger icon={<DeleteOutlined />}>Xóa lớp</Button>
+                                        </Popconfirm>
+                                    </div>
                                 </div>
-                                <div className={styles['manager-class-actions']}>
-                                    <Button icon={<TeamOutlined />} onClick={() => navigate(`/portal/classes/${item._id}`)}>Xem chi tiết lớp</Button>
-                                    <Button icon={<EditOutlined />} onClick={() => openClassroomModal(item)}>Sửa lớp</Button>
-                                    <Popconfirm title="Xóa lớp học này?" description="Thao tác này không xóa các học viên đã đăng ký." okText="Xóa" cancelText="Hủy" onConfirm={() => removeClassroom(item._id)}>
-                                        <Button danger icon={<DeleteOutlined />}>Xóa lớp</Button>
-                                    </Popconfirm>
-                                </div>
-                            </div>
-                        </Card>;
+                            </Card>;
                         })}
                     </div> : <Empty description="Chưa có lớp học" />}
                 </>;

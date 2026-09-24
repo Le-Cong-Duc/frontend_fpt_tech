@@ -1,0 +1,14 @@
+import { Card, Col, Row, Table } from 'antd';
+import { CheckCircleOutlined, ContactsOutlined, MessageOutlined, UserAddOutlined } from '@ant-design/icons';
+import { useAppSelector } from '@/redux/hooks';
+import { ConsultantEmpty, ConsultantState, LeadIcon, StatCard, statusTag, useConsultantData, useLeadStats } from './consultant.shared';
+import styles from '@/styles/client.module.scss';
+
+const ConsultantDashboard = () => {
+    const user = useAppSelector(state => state.account.user);
+    const data = useConsultantData();
+    const stats = useLeadStats(data.leads);
+    const pending = data.leads.filter(lead => !lead.status || !['REGISTERED', 'CONSULTED', 'CONTACTED'].includes(lead.status.toUpperCase())).slice(0, 6);
+    return <main className={`${styles.container} ${styles['consultant-page']}`}><section className={styles['consultant-welcome']}><div><span>CONSULTANT WORKSPACE</span><h1>Xin chào, {user.name || 'Nhân viên tư vấn'}</h1><p>Quản lý khách hàng, tư vấn chương trình học và theo dõi pipeline.</p></div><div className={styles['consultant-welcome-mark']}><ContactsOutlined /></div></section><ConsultantState loading={data.loading} error={data.error}>{!data.leads.length ? <ConsultantEmpty description="Chưa có khách hàng được phân công" /> : <><Row gutter={[16, 16]}><Col xs={24} sm={12} lg={6}><StatCard title="Tổng khách hàng" value={stats.total} icon={<ContactsOutlined />} accent="teal" /></Col><Col xs={24} sm={12} lg={6}><StatCard title="Khách mới" value={stats.newLeads} icon={<UserAddOutlined />} accent="coral" /></Col><Col xs={24} sm={12} lg={6}><StatCard title="Đã tư vấn" value={stats.consulted} icon={<MessageOutlined />} accent="navy" /></Col><Col xs={24} sm={12} lg={6}><StatCard title="Đã đăng ký" value={stats.registered} icon={<CheckCircleOutlined />} accent="green" /></Col></Row><Row gutter={[18, 18]} className={styles['consultant-dashboard-grid']}><Col xs={24} lg={14}><Card className={styles['portal-card']} title="Khách hàng cần follow-up"><Table size="middle" pagination={false} rowKey="_id" dataSource={pending} columns={[{ title: 'Khách hàng', render: (_: unknown, lead) => <span className={styles['consultant-person']}><LeadIcon status={lead.status} /> {lead.full_name || lead.name}</span> }, { title: 'Khóa học', dataIndex: 'course_name' }, { title: 'Liên hệ', dataIndex: 'phone' }, { title: 'Trạng thái', dataIndex: 'status', render: statusTag }]} /></Card></Col><Col xs={24} lg={10}><Card className={styles['portal-card']} title="Khóa học được quan tâm"><div className={styles['consultant-interest-list']}>{data.courses.slice(0, 6).map(course => <div key={course._id}><strong>{course.name}</strong><span>{course.level || 'Mọi trình độ'} · {course.price ? `${course.price}` : 'Liên hệ'}</span></div>)}</div></Card></Col></Row></>}</ConsultantState></main>;
+};
+export default ConsultantDashboard;
