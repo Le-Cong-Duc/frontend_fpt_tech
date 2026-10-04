@@ -40,6 +40,12 @@ import ConsultantCourses from './pages/client/consultant/ConsultantCourses';
 import ConsultantEnrollments from './pages/client/consultant/ConsultantEnrollments';
 import ConsultantFollowUp from './pages/client/consultant/ConsultantFollowUp';
 import ConsultantChat from './pages/client/consultant/ConsultantChat';
+import TeacherDashboard from './pages/client/dashboard/TeacherDashboard';
+import TeacherCourses from './pages/client/teacher/TeacherCourses';
+import TeacherClasses from './pages/client/teacher/TeacherClasses';
+import TeacherStudents from './pages/client/teacher/TeacherStudents';
+import TeacherSchedule from './pages/client/teacher/TeacherSchedule';
+import TeacherChat from './pages/client/teacher/TeacherChat';
 import ManagerDashboard from './pages/client/manager/ManagerDashboard';
 import ManagerClasses from './pages/client/manager/ManagerClasses';
 import ManagerTeachers from './pages/client/manager/ManagerTeachers';
@@ -90,6 +96,14 @@ const ManagerRoute = ({ children }: { children: ReactNode }) => {
     return <>{children}</>;
 };
 
+const TeacherRoute = ({ children }: { children: ReactNode }) => {
+    const { isAuthenticated, isLoading, user } = useAppSelector(state => state.account);
+    if (isLoading) return <Loading />;
+    if (!isAuthenticated) return <Navigate to="/login?callback=/client/teacher" replace />;
+    if (getPortalRole(user.role?.name) !== 'TEACHER') return <NotPermitted />;
+    return <>{children}</>;
+};
+
 const StudentRoute = ({ children }: { children: ReactNode }) => {
     const { isAuthenticated, isLoading, user } = useAppSelector(state => state.account);
     if (isLoading) return <Loading />;
@@ -103,6 +117,7 @@ const ClientRoute = ({ children }: { children: ReactNode }) => {
     if (isLoading) return <Loading />;
     if (!isAuthenticated) return <Navigate to="/login?callback=/client" replace />;
     if (isBackofficeRole(user.role?.name)) return <Navigate to="/admin" replace />;
+    if (getPortalRole(user.role?.name) === 'TEACHER') return <Navigate to="/client/teacher" replace />;
     if (!['STUDENT', 'TEACHER', 'CONSULTANT', 'ACCOUNTANT', 'MANAGER'].includes(getPortalRole(user.role?.name))) return <NotPermitted />;
     return <>{children}</>;
 };
@@ -222,6 +237,20 @@ export default function App() {
                 { path: 'follow-up', element: <ConsultantRoute><ConsultantFollowUp /></ConsultantRoute> },
                 { path: 'chat', element: <ConsultantRoute><ConsultantChat /></ConsultantRoute> },
                 { path: 'profile', element: <ConsultantRoute><PortalPage screen="profile" /></ConsultantRoute> },
+            ],
+        },
+        {
+            path: '/client/teacher',
+            element: <LayoutApp><ClientLayout /></LayoutApp>,
+            errorElement: <NotFound />,
+            children: [
+                { index: true, element: <TeacherRoute><TeacherDashboard /></TeacherRoute> },
+                { path: 'courses', element: <TeacherRoute><TeacherCourses /></TeacherRoute> },
+                { path: 'classes', element: <TeacherRoute><TeacherClasses /></TeacherRoute> },
+                { path: 'students', element: <TeacherRoute><TeacherStudents /></TeacherRoute> },
+                { path: 'schedule', element: <TeacherRoute><TeacherSchedule /></TeacherRoute> },
+                { path: 'chat', element: <TeacherRoute><TeacherChat /></TeacherRoute> },
+                { path: 'profile', element: <TeacherRoute><PortalPage screen="profile" /></TeacherRoute> },
             ],
         },
         {
