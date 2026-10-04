@@ -6,7 +6,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { callLogout } from '@/config/api';
 import { setLogoutAction } from '@/redux/slice/accountSlide';
-import { getPortalMenu, isBackofficeRole } from '@/config/portal';
+import { getClientMenu, isBackofficeRole } from '@/config/portal';
 import styles from '@/styles/client.module.scss';
 
 const Header = () => {
@@ -32,7 +32,7 @@ const Header = () => {
     const menuItems: MenuProps['items'] = [
         { label: <Link to="/">Trang Chủ</Link>, key: '/', icon: <TwitterOutlined /> },
         ...(isAuthenticated && !isBackoffice
-            ? getPortalMenu(user.role?.name).map(item => ({
+            ? getClientMenu(user.role?.name).map(item => ({
                 key: item.key,
                 label: <Link to={item.key}>{item.label}</Link>,
                 icon: item.icon,

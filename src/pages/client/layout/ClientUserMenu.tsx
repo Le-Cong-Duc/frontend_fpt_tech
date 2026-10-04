@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { callLogout } from '@/config/api';
 import { setLogoutAction } from '@/redux/slice/accountSlide';
-import { getPortalRole } from '@/config/portal';
+import { getClientProfilePath, getPortalRole } from '@/config/portal';
 
 const roleLabels = { STUDENT: 'Học viên', TEACHER: 'Giảng viên', CONSULTANT: 'Tư vấn viên', ACCOUNTANT: 'Kế toán', MANAGER: 'Quản lý' } as const;
 
@@ -13,7 +13,7 @@ const ClientUserMenu = () => {
     const dispatch = useAppDispatch();
     const user = useAppSelector(state => state.account.user);
     const role = getPortalRole(user.role?.name);
-    const profilePath = role === 'ACCOUNTANT' ? '/client/accountant/profile' : role === 'CONSULTANT' ? '/client/consultant/profile' : '/portal/profile';
+    const profilePath = getClientProfilePath(user.role?.name);
     const items: MenuProps['items'] = [
         { key: 'identity', disabled: true, label: <div><strong>{user.name || 'Tài khoản'}</strong><br /><Tag color="blue">{roleLabels[role]}</Tag></div> },
         { type: 'divider' },

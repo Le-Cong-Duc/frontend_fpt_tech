@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom';
 import { useAppSelector } from '@/redux/hooks';
 import Loading from '@/components/share/loading';
 import NotPermitted from '@/components/share/protected-route.ts/not-permitted';
-import { canAccessPortalPath, isBackofficeRole } from '@/config/portal';
+import { canAccessClientPath, isBackofficeRole } from '@/config/portal';
 
 interface PortalRouteProps {
     path?: string;
@@ -16,7 +16,7 @@ const PortalRoute = ({ path, children }: PortalRouteProps) => {
     if (isLoading) return <Loading />;
     if (!isAuthenticated) return <Navigate to="/login" replace />;
     if (isBackofficeRole(user.role?.name)) return <Navigate to="/admin" replace />;
-    if (path && !canAccessPortalPath(user.role?.name, path)) return <NotPermitted />;
+    if (path && !canAccessClientPath(user.role?.name, path)) return <NotPermitted />;
 
     return <>{children}</>;
 };

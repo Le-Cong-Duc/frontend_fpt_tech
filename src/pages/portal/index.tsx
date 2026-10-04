@@ -627,7 +627,7 @@ const PortalPage = ({ screen }: PortalPageProps) => {
                                         <p>Giảng viên phụ trách: {item.teacher_id?.name || 'Chưa có'}</p>
                                     </div>
                                     <div className={styles['manager-class-actions']}>
-                                        <Button icon={<TeamOutlined />} onClick={() => navigate(`/portal/classes/${item._id}`)}>Xem chi tiết lớp</Button>
+                                        <Button icon={<TeamOutlined />} onClick={() => navigate(`/client/manager/classes/${item._id}`)}>Xem chi tiết lớp</Button>
                                         <Button icon={<EditOutlined />} onClick={() => openClassroomModal(item)}>Sửa lớp</Button>
                                         <Popconfirm title="Xóa lớp học này?" description="Thao tác này không xóa các học viên đã đăng ký." okText="Xóa" cancelText="Hủy" onConfirm={() => removeClassroom(item._id)}>
                                             <Button danger icon={<DeleteOutlined />}>Xóa lớp</Button>

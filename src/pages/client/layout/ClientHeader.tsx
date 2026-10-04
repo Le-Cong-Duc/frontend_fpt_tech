@@ -6,18 +6,25 @@ import styles from '@/styles/client.module.scss';
 
 const titles: Record<string, string> = {
     '/client': 'Dashboard',
-    '/portal/profile': 'Thông tin cá nhân',
+    '/client/student/classes': 'Lớp học của tôi',
+    '/client/student/profile': 'Thông tin cá nhân',
+    '/client/teacher/profile': 'Thông tin cá nhân',
+    '/client/manager/classes': 'Lớp học',
+    '/client/manager/classes/:id': 'Chi tiết lớp học',
+    '/client/manager/profile': 'Thông tin cá nhân',
     '/client/consultant': 'Tổng quan tư vấn',
     '/client/consultant/customers': 'Khách hàng',
     '/client/consultant/courses': 'Khóa học',
     '/client/consultant/enrollments': 'Đăng ký học',
     '/client/consultant/follow-up': 'Theo dõi khách hàng',
     '/client/consultant/chat': 'Tin nhắn',
+    '/client/consultant/profile': 'Thông tin cá nhân',
     '/client/accountant': 'Tổng quan kế toán',
     '/client/accountant/tuition': 'Học phí',
     '/client/accountant/invoices': 'Hóa đơn',
     '/client/accountant/payments': 'Thanh toán',
     '/client/accountant/revenue': 'Doanh thu',
+    '/client/accountant/profile': 'Thông tin cá nhân',
 };
 
 const ClientHeader = ({ collapsed, onToggle }: { collapsed: boolean; onToggle: () => void }) => {

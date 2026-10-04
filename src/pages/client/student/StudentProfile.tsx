@@ -1,3 +1,5 @@
-import PortalPage from '@/pages/portal';
-const StudentProfile = () => <PortalPage screen="profile" />;
+import Profile from '@/pages/client/common/Profile';
+
+const StudentProfile = () => <Profile />;
+
 export default StudentProfile;

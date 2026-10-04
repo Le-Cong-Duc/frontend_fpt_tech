@@ -12,7 +12,7 @@ import {
 
 export type PortalRole = 'STUDENT' | 'TEACHER' | 'CONSULTANT' | 'MANAGER' | 'ACCOUNTANT';
 
-export interface PortalMenuItem {
+export interface ClientMenuItem {
     key: string;
     label: string;
     roles: PortalRole[];
@@ -37,62 +37,50 @@ export const getPortalRole = (roleName?: string): PortalRole => {
     return 'STUDENT';
 };
 
-export const portalMenu: PortalMenuItem[] = [
-    { key: '/client', label: 'Dashboard', roles: ['STUDENT', 'TEACHER', 'CONSULTANT', 'MANAGER', 'ACCOUNTANT'], icon: <RiseOutlined /> },
-    { key: '/portal/my-courses', label: 'Khóa học của tôi', roles: ['STUDENT'], icon: <BookOutlined /> },
-    { key: '/portal/classes', label: 'Lớp học', roles: ['STUDENT', 'TEACHER', 'MANAGER'], icon: <TeamOutlined /> },
-    { key: '/portal/schedule', label: 'Lịch học', roles: ['STUDENT', 'TEACHER'], icon: <CalendarOutlined /> },
-    { key: '/portal/invoices', label: 'Hóa đơn', roles: ['MANAGER'], icon: <FileTextOutlined /> },
-    { key: '/portal/payments', label: 'Thanh toán', roles: ['STUDENT'], icon: <CreditCardOutlined /> },
-    { key: '/client/teacher', label: 'Dashboard giảng viên', roles: ['TEACHER'], icon: <HomeOutlined /> },
+export const clientMenu: ClientMenuItem[] = [
+    { key: '/client/student', label: 'Dashboard', roles: ['STUDENT'], icon: <HomeOutlined /> },
+    { key: '/client/student/courses', label: 'Khóa học của tôi', roles: ['STUDENT'], icon: <BookOutlined /> },
+    { key: '/client/student/classes', label: 'Lớp học', roles: ['STUDENT'], icon: <TeamOutlined /> },
+    { key: '/client/student/schedule', label: 'Lịch học', roles: ['STUDENT'], icon: <CalendarOutlined /> },
+    { key: '/client/student/invoices', label: 'Hóa đơn', roles: ['STUDENT'], icon: <FileTextOutlined /> },
+    { key: '/client/student/payments', label: 'Thanh toán', roles: ['STUDENT'], icon: <CreditCardOutlined /> },
+    { key: '/client/student/profile', label: 'Thông tin cá nhân', roles: ['STUDENT'], icon: <UserOutlined /> },
+    { key: '/client/teacher', label: 'Dashboard', roles: ['TEACHER'], icon: <HomeOutlined /> },
     { key: '/client/teacher/courses', label: 'Khóa học của tôi', roles: ['TEACHER'], icon: <BookOutlined /> },
     { key: '/client/teacher/classes', label: 'Lớp học', roles: ['TEACHER'], icon: <TeamOutlined /> },
     { key: '/client/teacher/students', label: 'Học viên', roles: ['TEACHER'], icon: <TeamOutlined /> },
     { key: '/client/teacher/schedule', label: 'Lịch dạy', roles: ['TEACHER'], icon: <CalendarOutlined /> },
     { key: '/client/teacher/chat', label: 'Chat', roles: ['TEACHER'], icon: <FileTextOutlined /> },
     { key: '/client/teacher/profile', label: 'Thông tin cá nhân', roles: ['TEACHER'], icon: <UserOutlined /> },
-    { key: '/client/student', label: 'Dashboard học viên', roles: ['STUDENT'], icon: <HomeOutlined /> },
-    { key: '/client/student/courses', label: 'Khóa học của tôi', roles: ['STUDENT'], icon: <BookOutlined /> },
-    { key: '/client/student/schedule', label: 'Lịch học', roles: ['STUDENT'], icon: <CalendarOutlined /> },
-    { key: '/client/student/invoices', label: 'Hóa đơn', roles: ['STUDENT'], icon: <FileTextOutlined /> },
-    { key: '/client/student/payments', label: 'Thanh toán', roles: ['STUDENT'], icon: <CreditCardOutlined /> },
-    { key: '/client/student/profile', label: 'Thông tin cá nhân', roles: ['STUDENT'], icon: <UserOutlined /> },
-    { key: '/portal/students', label: 'Học viên', roles: ['TEACHER', 'MANAGER'], icon: <TeamOutlined /> },
-    { key: '/portal/teachers', label: 'Giảng viên', roles: ['MANAGER'], icon: <UserOutlined /> },
-    { key: '/portal/courses', label: 'Khóa học', roles: ['MANAGER'], icon: <BookOutlined /> },
-    { key: '/client/manager', label: 'Dashboard quản lý', roles: ['MANAGER'], icon: <HomeOutlined /> },
-    { key: '/client/manager/classes', label: 'Lớp học', roles: ['MANAGER'], icon: <TeamOutlined /> },
-    { key: '/client/manager/teachers', label: 'Giáo viên', roles: ['MANAGER'], icon: <UserOutlined /> },
-    { key: '/client/manager/students', label: 'Học viên', roles: ['MANAGER'], icon: <TeamOutlined /> },
-    { key: '/client/manager/courses', label: 'Khóa học', roles: ['MANAGER'], icon: <BookOutlined /> },
-    { key: '/client/manager/schedule', label: 'Lịch học', roles: ['MANAGER'], icon: <CalendarOutlined /> },
-    { key: '/portal/leads', label: 'Khách hàng tư vấn', roles: [], icon: <UserOutlined /> },
-    { key: '/client/consultant', label: 'Tổng quan tư vấn', roles: ['CONSULTANT'], icon: <TeamOutlined /> },
+    { key: '/client/consultant', label: 'Dashboard', roles: ['CONSULTANT'], icon: <HomeOutlined /> },
     { key: '/client/consultant/customers', label: 'Khách hàng', roles: ['CONSULTANT'], icon: <UserOutlined /> },
     { key: '/client/consultant/courses', label: 'Khóa học', roles: ['CONSULTANT'], icon: <BookOutlined /> },
     { key: '/client/consultant/enrollments', label: 'Đăng ký học', roles: ['CONSULTANT'], icon: <TeamOutlined /> },
     { key: '/client/consultant/follow-up', label: 'Theo dõi khách hàng', roles: ['CONSULTANT'], icon: <CalendarOutlined /> },
     { key: '/client/consultant/chat', label: 'Tin nhắn', roles: ['CONSULTANT'], icon: <FileTextOutlined /> },
-    { key: '/portal/profile', label: 'Thông tin cá nhân', roles: ['STUDENT', 'TEACHER', 'CONSULTANT', 'MANAGER', 'ACCOUNTANT'], icon: <UserOutlined /> },
-    { key: '/client/accountant', label: 'Tổng quan kế toán', roles: ['ACCOUNTANT'], icon: <CreditCardOutlined /> },
+    { key: '/client/consultant/profile', label: 'Thông tin cá nhân', roles: ['CONSULTANT'], icon: <UserOutlined /> },
+    { key: '/client/manager', label: 'Dashboard', roles: ['MANAGER'], icon: <HomeOutlined /> },
+    { key: '/client/manager/classes', label: 'Lớp học', roles: ['MANAGER'], icon: <TeamOutlined /> },
+    { key: '/client/manager/teachers', label: 'Giáo viên', roles: ['MANAGER'], icon: <UserOutlined /> },
+    { key: '/client/manager/students', label: 'Học viên', roles: ['MANAGER'], icon: <TeamOutlined /> },
+    { key: '/client/manager/courses', label: 'Khóa học', roles: ['MANAGER'], icon: <BookOutlined /> },
+    { key: '/client/manager/schedule', label: 'Lịch học', roles: ['MANAGER'], icon: <CalendarOutlined /> },
+    { key: '/client/manager/profile', label: 'Thông tin cá nhân', roles: ['MANAGER'], icon: <UserOutlined /> },
+    { key: '/client/accountant', label: 'Dashboard', roles: ['ACCOUNTANT'], icon: <HomeOutlined /> },
     { key: '/client/accountant/tuition', label: 'Học phí', roles: ['ACCOUNTANT'], icon: <FileTextOutlined /> },
     { key: '/client/accountant/invoices', label: 'Hóa đơn', roles: ['ACCOUNTANT'], icon: <FileTextOutlined /> },
     { key: '/client/accountant/payments', label: 'Thanh toán', roles: ['ACCOUNTANT'], icon: <CreditCardOutlined /> },
-    { key: '/client/accountant/revenue', label: 'Doanh thu', roles: ['ACCOUNTANT'], icon: <CalendarOutlined /> },
+    { key: '/client/accountant/revenue', label: 'Doanh thu', roles: ['ACCOUNTANT'], icon: <RiseOutlined /> },
     { key: '/client/accountant/profile', label: 'Thông tin cá nhân', roles: ['ACCOUNTANT'], icon: <UserOutlined /> },
 ];
 
-export const getPortalMenu = (roleName?: string): PortalMenuItem[] => {
-    const portalRole = getPortalRole(roleName);
-    return portalMenu
-        .filter(item => item.roles.includes(portalRole))
-        .map(item => ({
-            ...item,
-            label: item.key === '/portal/schedule' && portalRole === 'TEACHER' ? 'Lịch dạy' : item.label,
-        }));
+export const getClientMenu = (roleName?: string): ClientMenuItem[] => {
+    const role = getPortalRole(roleName);
+    return clientMenu.filter(item => item.roles.includes(role));
 };
 
-export const canAccessPortalPath = (roleName: string | undefined, path: string) => {
-    const portalRole = getPortalRole(roleName);
-    return portalMenu.some(item => item.key === path && item.roles.includes(portalRole));
-};
+export const getClientProfilePath = (roleName?: string) =>
+    getClientMenu(roleName).find(item => item.label === 'Thông tin cá nhân')?.key || '/client/student/profile';
+
+export const canAccessClientPath = (roleName: string | undefined, path: string) =>
+    getClientMenu(roleName).some(item => item.key === path);

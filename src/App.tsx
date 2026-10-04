@@ -23,9 +23,6 @@ import InvoicePage from './pages/admin/invoice';
 import PaymentPage from './pages/admin/payment';
 import LeadPage from './pages/admin/lead';
 import CourseDetailPage from './pages/course/detail';
-import PortalPage from './pages/portal';
-import ClassDetailPage from './pages/portal/class-detail';
-import PortalRoute from './components/client/portal-route';
 import Loading from './components/share/loading';
 import NotPermitted from './components/share/protected-route.ts/not-permitted';
 import { isAccountantRole } from './config/portal';
@@ -60,6 +57,9 @@ import StudentSchedule from './pages/client/student/StudentSchedule';
 import StudentInvoices from './pages/client/student/StudentInvoices';
 import StudentPayments from './pages/client/student/StudentPayments';
 import StudentProfile from './pages/client/student/StudentProfile';
+import StudentClasses from './pages/client/student/StudentClasses';
+import Profile from './pages/client/common/Profile';
+import ManagerClassDetail from './pages/client/manager/ManagerClassDetail';
 
 const BackendModulePage = ({ title, endpoint }: { title: string; endpoint: string }) => (
     <div style={{ padding: 24 }}>
@@ -167,29 +167,11 @@ export default function App() {
             children: [
                 { index: true, element: <StudentRoute><ClientDashboard /></StudentRoute> },
                 { path: 'courses', element: <StudentRoute><StudentCourses /></StudentRoute> },
+                { path: 'classes', element: <StudentRoute><StudentClasses /></StudentRoute> },
                 { path: 'schedule', element: <StudentRoute><StudentSchedule /></StudentRoute> },
                 { path: 'invoices', element: <StudentRoute><StudentInvoices /></StudentRoute> },
                 { path: 'payments', element: <StudentRoute><StudentPayments /></StudentRoute> },
                 { path: 'profile', element: <StudentRoute><StudentProfile /></StudentRoute> },
-            ],
-        },
-        {
-            path: '/portal',
-            element: <LayoutApp><ClientLayout /></LayoutApp>,
-            errorElement: <NotFound />,
-            children: [
-                { index: true, element: <PortalRoute><PortalPage screen="home" /></PortalRoute> },
-                { path: 'my-courses', element: <PortalRoute path="/portal/my-courses"><PortalPage screen="my-courses" /></PortalRoute> },
-                { path: 'classes', element: <PortalRoute path="/portal/classes"><PortalPage screen="classes" /></PortalRoute> },
-                { path: 'classes/:id', element: <PortalRoute><ClassDetailPage /></PortalRoute> },
-                { path: 'schedule', element: <PortalRoute path="/portal/schedule"><PortalPage screen="schedule" /></PortalRoute> },
-                { path: 'invoices', element: <PortalRoute path="/portal/invoices"><PortalPage screen="invoices" /></PortalRoute> },
-                { path: 'payments', element: <PortalRoute path="/portal/payments"><PortalPage screen="payments" /></PortalRoute> },
-                { path: 'students', element: <PortalRoute path="/portal/students"><PortalPage screen="students" /></PortalRoute> },
-                { path: 'teachers', element: <PortalRoute path="/portal/teachers"><PortalPage screen="teachers" /></PortalRoute> },
-                { path: 'courses', element: <PortalRoute path="/portal/courses"><PortalPage screen="courses" /></PortalRoute> },
-                { path: 'leads', element: <PortalRoute path="/portal/leads"><PortalPage screen="leads" /></PortalRoute> },
-                { path: 'profile', element: <PortalRoute path="/portal/profile"><PortalPage screen="profile" /></PortalRoute> },
             ],
         },
         {
@@ -222,7 +204,7 @@ export default function App() {
                 { path: 'invoices', element: <AccountantRoute><AccountantInvoices /></AccountantRoute> },
                 { path: 'payments', element: <AccountantRoute><AccountantPayments /></AccountantRoute> },
                 { path: 'revenue', element: <AccountantRoute><AccountantRevenue /></AccountantRoute> },
-                { path: 'profile', element: <AccountantRoute><PortalPage screen="profile" /></AccountantRoute> },
+                { path: 'profile', element: <AccountantRoute><Profile /></AccountantRoute> },
             ],
         },
         {
@@ -236,7 +218,7 @@ export default function App() {
                 { path: 'enrollments', element: <ConsultantRoute><ConsultantEnrollments /></ConsultantRoute> },
                 { path: 'follow-up', element: <ConsultantRoute><ConsultantFollowUp /></ConsultantRoute> },
                 { path: 'chat', element: <ConsultantRoute><ConsultantChat /></ConsultantRoute> },
-                { path: 'profile', element: <ConsultantRoute><PortalPage screen="profile" /></ConsultantRoute> },
+                { path: 'profile', element: <ConsultantRoute><Profile /></ConsultantRoute> },
             ],
         },
         {
@@ -250,7 +232,7 @@ export default function App() {
                 { path: 'students', element: <TeacherRoute><TeacherStudents /></TeacherRoute> },
                 { path: 'schedule', element: <TeacherRoute><TeacherSchedule /></TeacherRoute> },
                 { path: 'chat', element: <TeacherRoute><TeacherChat /></TeacherRoute> },
-                { path: 'profile', element: <TeacherRoute><PortalPage screen="profile" /></TeacherRoute> },
+                { path: 'profile', element: <TeacherRoute><Profile /></TeacherRoute> },
             ],
         },
         {
@@ -259,12 +241,13 @@ export default function App() {
             errorElement: <NotFound />,
             children: [
                 { index: true, element: <ManagerRoute><ManagerDashboard /></ManagerRoute> },
+                { path: 'classes/:id', element: <ManagerRoute><ManagerClassDetail /></ManagerRoute> },
                 { path: 'classes', element: <ManagerRoute><ManagerClasses /></ManagerRoute> },
                 { path: 'teachers', element: <ManagerRoute><ManagerTeachers /></ManagerRoute> },
                 { path: 'students', element: <ManagerRoute><ManagerStudents /></ManagerRoute> },
                 { path: 'courses', element: <ManagerRoute><ManagerCourses /></ManagerRoute> },
                 { path: 'schedule', element: <ManagerRoute><ManagerSchedule /></ManagerRoute> },
-                { path: 'profile', element: <ManagerRoute><PortalPage screen="profile" /></ManagerRoute> },
+                { path: 'profile', element: <ManagerRoute><Profile /></ManagerRoute> },
             ],
         },
         { path: '/login', element: <LoginPage /> },
