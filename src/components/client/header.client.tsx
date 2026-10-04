@@ -6,7 +6,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { callLogout } from '@/config/api';
 import { setLogoutAction } from '@/redux/slice/accountSlide';
-import { getPortalMenu, isBackofficeRole } from '@/config/portal';
+import { getAccountantMenu, getPortalMenu, isAccountantRole, isBackofficeRole } from '@/config/portal';
 import styles from '@/styles/client.module.scss';
 
 const Header = () => {
@@ -19,8 +19,9 @@ const Header = () => {
     const [current, setCurrent] = useState('/');
     const [isCompact, setIsCompact] = useState(false);
     const isBackoffice = isBackofficeRole(user.role?.name);
+    const isAccountant = isAccountantRole(user.role?.name);
 
-    useEffect(() => setCurrent(location.pathname), [location]);
+    useEffect(() => setCurrent(location.pathname === '/accountant' && !location.search ? '/accountant?view=home' : `${location.pathname}${location.search}`), [location]);
 
     useEffect(() => {
         const handleResize = () => setIsCompact(window.innerWidth < 768);
@@ -30,8 +31,16 @@ const Header = () => {
     }, []);
 
     const menuItems: MenuProps['items'] = [
-        { label: <Link to="/">Trang Chủ</Link>, key: '/', icon: <TwitterOutlined /> },
-        ...(isAuthenticated && !isBackoffice
+        isAuthenticated && isAccountant
+            ? { label: <Link to="/accountant?view=home">Trang Chủ</Link>, key: '/accountant?view=home', icon: <TwitterOutlined /> }
+            : { label: <Link to="/">Trang Chủ</Link>, key: '/', icon: <TwitterOutlined /> },
+        ...(isAuthenticated && isAccountant
+            ? getAccountantMenu().filter(item => item.key !== '/accountant?view=home').map(item => ({
+                key: item.key,
+                label: <Link to={item.key}>{item.label}</Link>,
+                icon: item.icon,
+            }))
+            : isAuthenticated && !isBackoffice
             ? getPortalMenu(user.role?.name).map(item => ({
                 key: item.key,
                 label: <Link to={item.key}>{item.label}</Link>,
@@ -50,7 +59,7 @@ const Header = () => {
     };
 
     const dropdownItems: MenuProps['items'] = [
-        ...(isBackoffice ? [{ label: <Link to="/admin">Trang Quản trị</Link>, key: 'admin', icon: <DashOutlined /> }] : []),
+        ...(isBackoffice ? [{ label: <Link to={isAccountant ? '/accountant' : '/admin'}>{isAccountant ? 'Khu vực kế toán' : 'Trang Quản trị'}</Link>, key: isAccountant ? 'accountant' : 'admin', icon: <DashOutlined /> }] : []),
         { label: <span onClick={handleLogout}>Đăng xuất</span>, key: 'logout', icon: <LogoutOutlined /> },
     ];
 
@@ -113,7 +122,7 @@ const Header = () => {
                 onClick={({ key }) => {
                     setCurrent(key);
                     setOpenMobileMenu(false);
-                    if (key !== 'logout' && key !== 'admin') {
+                    if (key !== 'logout' && key !== 'admin' && key !== 'accountant') {
                         navigate(key.toString());
                     }
                 }}

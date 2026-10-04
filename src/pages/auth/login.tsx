@@ -28,20 +28,28 @@ const LoginPage = () => {
     const onFinish = async (values: any) => {
         const { username, password } = values;
         setIsSubmit(true);
-        const res = await callLogin(username, password);
-        setIsSubmit(false);
-        if (res?.data) {
-            localStorage.setItem('access_token', res.data.access_token);
-            dispatch(setUserLoginInfo(res.data.user))
-            message.success('Đăng nhập tài khoản thành công!');
-            window.location.href = callback ? callback : '/';
-        } else {
+        try {
+            const res = await callLogin(username, password);
+            if (res?.data) {
+                localStorage.setItem('access_token', res.data.access_token);
+                dispatch(setUserLoginInfo(res.data.user))
+                message.success('Đăng nhập tài khoản thành công!');
+                window.location.href = callback ? callback : '/';
+            } else {
+                notification.error({
+                    message: "Có lỗi xảy ra",
+                    description: res?.message && Array.isArray(res.message) ? res.message[0] : res?.message || 'Không thể đăng nhập.',
+                    duration: 5
+                })
+            }
+        } catch {
             notification.error({
-                message: "Có lỗi xảy ra",
-                description:
-                    res.message && Array.isArray(res.message) ? res.message[0] : res.message,
-                duration: 5
-            })
+                message: 'Không thể kết nối máy chủ',
+                description: 'Backend chưa chạy hoặc không truy cập được tại http://localhost:8000.',
+                duration: 6,
+            });
+        } finally {
+            setIsSubmit(false);
         }
     };
 

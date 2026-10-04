@@ -22,6 +22,7 @@ import { isMobile } from 'react-device-detect';
 import type { MenuProps } from 'antd';
 import { setLogoutAction } from '@/redux/slice/accountSlide';
 import { ALL_PERMISSIONS } from '@/config/permissions';
+import { isAccountantRole } from '@/config/portal';
 
 const { Content, Footer, Sider } = Layout;
 
@@ -31,6 +32,7 @@ const LayoutAdmin = () => {
     const [collapsed, setCollapsed] = useState(false);
     const [activeMenu, setActiveMenu] = useState('');
     const user = useAppSelector(state => state.account.user);
+    const isAccountant = isAccountantRole(user.role?.name);
 
     const permissions = useAppSelector(state => state.account.user.permissions);
     const [menuItems, setMenuItems] = useState<MenuProps['items']>([]);
@@ -45,9 +47,15 @@ const LayoutAdmin = () => {
                 && item.method === 'GET'
             );
 
+            const resources = (['COURSES', 'CLASSROOMS', 'ENROLLMENTS', 'INVOICES', 'PAYMENTS', 'LEADS', 'CONVERSATIONS', 'MESSAGES', 'NOTIFICATIONS'] as const)
+                .filter(resource => !isAccountant || resource === 'INVOICES' || resource === 'PAYMENTS');
+            const resourceLabels: Partial<Record<typeof resources[number], string>> = {
+                INVOICES: 'Hóa đơn',
+                PAYMENTS: 'Thanh toán',
+            };
             const full = [
                 {
-                    label: <Link to='/admin'>Dashboard</Link>,
+                    label: <Link to={isAccountant ? '/accountant?view=home' : '/admin'}>{isAccountant ? 'Trang chủ kế toán' : 'Dashboard'}</Link>,
                     key: '/admin',
                     icon: <AppstoreOutlined />
                 },
@@ -66,10 +74,10 @@ const LayoutAdmin = () => {
                     key: '/admin/permissions',
                     icon: <ApiOutlined />
                 }] : []),
-                ...(['COURSES', 'CLASSROOMS', 'ENROLLMENTS', 'INVOICES', 'PAYMENTS', 'LEADS', 'CONVERSATIONS', 'MESSAGES', 'NOTIFICATIONS'] as const)
+                ...resources
                     .filter(resource => canView(resource))
                     .map(resource => ({
-                        label: <Link to={`/admin/${resource.toLowerCase()}`}>{resource.charAt(0) + resource.slice(1).toLowerCase()}</Link>,
+                        label: <Link to={`/admin/${resource.toLowerCase()}`}>{resourceLabels[resource] ?? resource.charAt(0) + resource.slice(1).toLowerCase()}</Link>,
                         key: `/admin/${resource.toLowerCase()}`,
                         icon: resource === 'COURSES' ? <BookOutlined />
                             : resource === 'LEADS' ? <SolutionOutlined />
@@ -82,7 +90,7 @@ const LayoutAdmin = () => {
 
             setMenuItems(full);
         }
-    }, [permissions])
+    }, [isAccountant, permissions])
     useEffect(() => {
         setActiveMenu(location.pathname)
     }, [location])
@@ -134,7 +142,7 @@ const LayoutAdmin = () => {
                         collapsed={collapsed}
                         onCollapse={(value) => setCollapsed(value)}>
                         <div style={{ height: 32, margin: 16, textAlign: 'center' }}>
-                            <BugOutlined />  ADMIN
+                                    <BugOutlined />  {isAccountant ? 'ACCOUNTANT' : 'ADMIN'}
                         </div>
                         <Menu
                             selectedKeys={[activeMenu]}
@@ -168,7 +176,7 @@ const LayoutAdmin = () => {
 
                             <Dropdown menu={{ items: itemsDropdown }} trigger={['click']}>
                                 <Space style={{ cursor: "pointer" }}>
-                                    Welcome {user?.name}
+                                    {isAccountant ? 'Kế toán' : 'Welcome'} {user?.name}
                                     <Avatar> {user?.name?.substring(0, 2)?.toUpperCase()} </Avatar>
 
                                 </Space>

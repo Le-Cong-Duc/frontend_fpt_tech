@@ -559,8 +559,45 @@
     span { margin-top: 4px; font-size: 10px; font-weight: 700; }
 }
 
+.accountant-workspace { min-height: 640px; color: #17233b; }
+.accountant-toolbar { display: flex; justify-content: flex-end; padding: 22px 0 0; }
+.accountant-search-input { width: min(100%, 384px); }
+.accountant-content { padding: 22px 0 42px; }
+.accountant-search-hint { margin-bottom: 12px; color: #71818c; font-size: 13px; }
+.accountant-loading { display: grid; min-height: 220px; place-items: center; }
+.accountant-panel { border: 1px solid #e4ebef; border-radius: 8px; box-shadow: 0 7px 20px rgba(28, 49, 74, .05); background: #fff; }
+.accountant-dashboard-grid { margin-top: 14px; margin-bottom: 14px; }
+.accountant-stat-card { border: 1px solid #e4ebef; border-top: 3px solid #1f6f78; border-radius: 8px; background: #fff; box-shadow: 0 7px 20px rgba(28, 49, 74, .05); }
+.accountant-stat-card :global(.ant-statistic-title) { color: #71818c; font-size: 12px; }
+.accountant-stat-card :global(.ant-statistic-content) { color: #172b4d; font-size: 22px; font-weight: 800; }
+.accountant-stat-card :global(.ant-statistic-content-prefix) { font-size: 17px; }
+.accountant-teal { border-top-color: #1f6f78; }
+.accountant-orange { border-top-color: #e88a2c; }
+.accountant-blue { border-top-color: #437ca5; }
+.accountant-purple { border-top-color: #7667a6; }
+.accountant-chart { height: 230px; display: flex; align-items: end; justify-content: space-around; gap: 12px; padding: 24px 16px 0; border-bottom: 1px solid #dfe8eb; background: linear-gradient(#fff, #fbfcfc); }
+.accountant-bar-column { height: 100%; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: end; gap: 6px; color: #71818c; font-size: 11px; }
+.accountant-bar { width: min(42px, 80%); min-height: 8px; border-radius: 5px 5px 0 0; background: linear-gradient(180deg, #2f8990, #1f6f78); }
+.accountant-bar-value { min-height: 16px; color: #1f6f78; font-size: 10px; }
+.accountant-debtor-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 0; border-bottom: 1px solid #edf1f2; }
+.accountant-debtor-row:last-child { border-bottom: 0; }
+.accountant-debtor-row b, .accountant-debtor-row small { display: block; }
+.accountant-debtor-row small { margin-top: 4px; color: #81919b; }
+.accountant-confirm-box { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 22px; padding: 16px; border-radius: 8px; background: #f2f7f8; }
+.accountant-confirm-box span { color: #71818c; font-size: 12px; }
+.accountant-confirm-box strong { color: #e26f11; font-size: 20px; }
+.accountant-report-chart { height: 300px; display: flex; align-items: end; gap: 18px; padding: 24px 20px 0; border-bottom: 1px solid #dfe8eb; }
+.accountant-report-column { flex: 1; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: end; gap: 7px; font-size: 11px; color: #71818c; }
+.accountant-report-column b { color: #172b4d; font-size: 11px; }
+.accountant-report-bar { width: min(70px, 90%); min-height: 12px; border-radius: 6px 6px 0 0; background: linear-gradient(180deg, #2f8990, #1f6f78); }
+
 @media (max-width: 600px) {
     .portal-hero { padding: 26px 22px; }
+    .accountant-content { padding: 22px 0 32px; }
+    .accountant-toolbar { justify-content: stretch; }
+    .accountant-search-input { width: 100%; }
+    .accountant-chart { gap: 4px; padding-inline: 4px; }
+    .accountant-report-chart { gap: 5px; padding-inline: 5px; }
     .schedule-row { align-items: flex-start; flex-wrap: wrap; }
     .class-detail-grid { grid-template-columns: 1fr; }
     .manager-class-actions {

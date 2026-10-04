@@ -2,7 +2,10 @@ import type { ReactNode } from 'react';
 import {
     BookOutlined,
     CalendarOutlined,
+    BarChartOutlined,
+    CheckCircleOutlined,
     CreditCardOutlined,
+    DollarOutlined,
     FileTextOutlined,
     TeamOutlined,
     UserOutlined,
@@ -17,11 +20,22 @@ export interface PortalMenuItem {
     icon: ReactNode;
 }
 
+export interface AccountantMenuItem {
+    key: string;
+    label: string;
+    icon: ReactNode;
+}
+
 const normalizeRole = (value = '') => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
 
 export const isBackofficeRole = (roleName?: string) => {
     const role = normalizeRole(roleName);
-    return role.includes('ADMIN') || role.includes('QUAN TRI');
+    return role.includes('ADMIN') || role.includes('QUAN TRI') || isAccountantRole(role);
+};
+
+export const isAccountantRole = (roleName?: string) => {
+    const role = normalizeRole(roleName);
+    return role.includes('ACCOUNTANT') || role.includes('KE TOAN') || role.includes('KETOAN');
 };
 
 export const getPortalRole = (roleName?: string): PortalRole => {
@@ -44,6 +58,20 @@ export const portalMenu: PortalMenuItem[] = [
     { key: '/portal/leads', label: 'Khách hàng tư vấn', roles: ['CONSULTANT'], icon: <UserOutlined /> },
     { key: '/portal/profile', label: 'Thông tin cá nhân', roles: ['STUDENT', 'TEACHER', 'CONSULTANT', 'MANAGER'], icon: <UserOutlined /> },
 ];
+
+export const accountantMenu: AccountantMenuItem[] = [
+    { key: '/accountant?view=home', label: 'Trang chủ', icon: <BarChartOutlined /> },
+    { key: '/accountant?view=fees', label: 'Học phí học viên', icon: <TeamOutlined /> },
+    { key: '/accountant?view=create-invoice', label: 'Tạo hóa đơn', icon: <FileTextOutlined /> },
+    { key: '/accountant?view=confirm-payment', label: 'Xác nhận thanh toán', icon: <CheckCircleOutlined /> },
+    { key: '/accountant?view=payment-history', label: 'Lịch sử thanh toán', icon: <CreditCardOutlined /> },
+    { key: '/accountant?view=invoices', label: 'Xem hóa đơn', icon: <FileTextOutlined /> },
+    { key: '/accountant?view=export', label: 'Xuất hóa đơn', icon: <DollarOutlined /> },
+    { key: '/accountant?view=revenue', label: 'Doanh thu theo tháng', icon: <BarChartOutlined /> },
+    { key: '/accountant?view=debtors', label: 'Học viên chưa đóng phí', icon: <TeamOutlined /> },
+];
+
+export const getAccountantMenu = () => accountantMenu;
 
 export const getPortalMenu = (roleName?: string): PortalMenuItem[] => {
     const portalRole = getPortalRole(roleName);

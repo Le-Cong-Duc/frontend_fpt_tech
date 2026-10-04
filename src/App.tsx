@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { createBrowserRouter, Outlet, RouterProvider, useLocation } from 'react-router-dom';
-import { useAppDispatch } from '@/redux/hooks';
+import { createBrowserRouter, Navigate, Outlet, RouterProvider, useLocation } from 'react-router-dom';
+import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import NotFound from 'components/share/not.found';
 import LoginPage from 'pages/auth/login';
 import RegisterPage from 'pages/auth/register';
@@ -26,6 +26,9 @@ import CourseDetailPage from './pages/course/detail';
 import PortalPage from './pages/portal';
 import ClassDetailPage from './pages/portal/class-detail';
 import PortalRoute from './components/client/portal-route';
+import AccountantPage from './pages/accountant';
+import { isAccountantRole } from './config/portal';
+import Loading from './components/share/loading';
 
 const BackendModulePage = ({ title, endpoint }: { title: string; endpoint: string }) => (
     <div style={{ padding: 24 }}>
@@ -38,7 +41,15 @@ const ProtectedModuleRoute = ({ children }: { children: ReactNode }) => (
     <ProtectedRoute>{children}</ProtectedRoute>
 );
 
-const LayoutClient = () => {
+const AccountantRoute = ({ children }: { children: ReactNode }) => {
+    const { isAuthenticated, isLoading, user } = useAppSelector(state => state.account);
+    if (isLoading) return <Loading />;
+    if (!isAuthenticated) return <Navigate to="/login" replace />;
+    if (!isAccountantRole(user.role?.name)) return <Navigate to="/admin" replace />;
+    return <>{children}</>;
+};
+
+export const LayoutClient = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const location = useLocation();
     const rootRef = useRef<HTMLDivElement>(null);
@@ -75,6 +86,12 @@ export default function App() {
             children: [{ index: true, element: <HomePage /> }],
         },
         { path: '/courses/:id', element: <LayoutApp><LayoutClient /></LayoutApp>, errorElement: <NotFound />, children: [{ index: true, element: <CourseDetailPage /> }] },
+        {
+            path: '/accountant',
+            element: <LayoutApp><LayoutClient /></LayoutApp>,
+            errorElement: <NotFound />,
+            children: [{ index: true, element: <AccountantRoute><AccountantPage /></AccountantRoute> }],
+        },
         {
             path: '/portal',
             element: <LayoutApp><LayoutClient /></LayoutApp>,
