@@ -8,7 +8,7 @@ import LayoutAdmin from 'components/admin/layout.admin';
 import ProtectedRoute from 'components/share/protected-route.ts';
 import Header from 'components/client/header.client';
 import Footer from 'components/client/footer.client';
-import HomePage from 'pages/home';
+import CourseCard from './components/client/card/course.card';
 import styles from 'styles/app.module.scss';
 import DashboardPage from './pages/admin/dashboard';
 import PermissionPage from './pages/admin/permission';
@@ -22,7 +22,7 @@ import EnrollmentPage from './pages/admin/enrollment';
 import InvoicePage from './pages/admin/invoice';
 import PaymentPage from './pages/admin/payment';
 import LeadPage from './pages/admin/lead';
-import CourseDetailPage from './pages/course/detail';
+import CourseDetail from './pages/client/common/CourseDetail';
 import Loading from './components/share/loading';
 import NotPermitted from './components/share/protected-route.ts/not-permitted';
 import { isAccountantRole } from './config/portal';
@@ -156,9 +156,9 @@ export default function App() {
             path: '/',
             element: <LayoutApp><LayoutClient /></LayoutApp>,
             errorElement: <NotFound />,
-            children: [{ index: true, element: <HomePage /> }],
+            children: [{ index: true, element: <CourseCard /> }],
         },
-        { path: '/courses/:id', element: <LayoutApp><LayoutClient /></LayoutApp>, errorElement: <NotFound />, children: [{ index: true, element: <CourseDetailPage /> }] },
+        { path: '/client/courses/:id', element: <LayoutApp><LayoutClient /></LayoutApp>, errorElement: <NotFound />, children: [{ index: true, element: <CourseDetail /> }] },
         { path: '/client', element: <LayoutApp><ClientLayout /></LayoutApp>, errorElement: <NotFound />, children: [{ index: true, element: <ClientRoute><ClientDashboard /></ClientRoute> }] },
         {
             path: '/client/student',

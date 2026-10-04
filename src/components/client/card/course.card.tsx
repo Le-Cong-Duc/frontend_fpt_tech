@@ -96,7 +96,7 @@ const CourseCard = () => {
                                 </div>
                                 <div className={styles['course-footer']}>
                                     <span><DollarOutlined /> {formatPrice(course.price)}</span>
-                                    <button type="button" onClick={() => navigate(`/courses/${course._id}`)}>Xem chi tiết</button>
+                                    <button type="button" disabled={!course._id} onClick={() => course._id && navigate(`/client/courses/${course._id}`)}>Xem chi tiết</button>
                                 </div>
                             </article>
                         ))}
