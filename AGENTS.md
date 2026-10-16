@@ -43,5 +43,19 @@
 
 ### Quality & Type Checking
 * Keep strict TypeScript compliance.
-* Verify changes by executing `npx tsc --noEmit` from the `frontend_fpt_tech` folder.
+* Verify changes by executing `node ./node_modules/typescript/bin/tsc --noEmit` and `npm run build` from the `frontend_fpt_tech` folder.
+
+---
+
+## 3. Quy tắc tự động quản lý Git và GitHub
+1. Trước khi thay đổi code, kiểm tra `git status`, branch hiện tại và cấu hình remote. Không ghi đè hoặc xóa các thay đổi có sẵn của người dùng.
+2. Chủ động triển khai nhiệm vụ, chạy các bài kiểm tra phù hợp (`tsc --noEmit`, `npm run build`, v.v.) và xem lại những thay đổi đã thực hiện.
+3. Khi hoàn thành một nhiệm vụ có ý nghĩa và các kiểm tra cần thiết đều đạt, tự động tạo Git commit với thông điệp ngắn gọn, rõ ràng theo Conventional Commits (ví dụ: `feat: ...`, `fix: ...`).
+4. Chỉ đưa những tệp liên quan đến nhiệm vụ vào commit. Không commit `.env`, secrets, mật khẩu, token, thông tin xác thực hoặc các tệp nhạy cảm.
+5. Nếu dự án đã có Git remote GitHub và xác thực hoạt động, tự động push commit lên đúng branch hiện tại sau khi commit thành công.
+6. Tuyệt đối không tự ý force push (`--force`), xóa branch, sửa lịch sử commit đã chia sẻ hoặc ghi đè thay đổi của người khác.
+7. Nếu kiểm thử thất bại, không được tuyên bố thành công. Hãy sửa lỗi nếu có thể; nếu chưa khắc phục được thì báo cáo và không tạo commit thành công giả.
+8. Nếu Git chưa được khởi tạo, chưa có remote hoặc chưa đăng nhập GitHub, hãy thông báo tình trạng và hướng dẫn cấu hình. Không tự ý tạo repository trên GitHub hoặc thay đổi remote.
+9. Không dừng lại chỉ để hỏi người dùng có muốn commit hay push hay không nếu các điều kiện trên đều đã đáp ứng và quyền thực thi cho phép.
+10. Cuối nhiệm vụ, báo cáo chi tiết các thay đổi, kết quả kiểm thử, commit hash và trạng thái push GitHub. Chỉ báo đã push thành công khi đã xác minh được kết quả thực tế.
 
