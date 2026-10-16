@@ -2409,3 +2409,123 @@
         min-width: 0;
     }
 }
+
+/* Accountant financial document & enhanced printable styling */
+.accountant-financial-doc {
+    background: #ffffff;
+    border: 1px solid #d9e2ec;
+    border-radius: 8px;
+    padding: 24px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #102a43;
+}
+
+.financial-doc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #0f62fe;
+    margin-bottom: 20px;
+}
+
+.financial-doc-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.financial-doc-brand {
+    font-size: 20px;
+    font-weight: 700;
+    color: #0f62fe;
+    letter-spacing: 0.5px;
+}
+
+.financial-doc-sub {
+    font-size: 11px;
+    color: #627d98;
+    margin-top: 2px;
+}
+
+.financial-doc-meta {
+    text-align: right;
+    font-size: 12px;
+    color: #486581;
+}
+
+.financial-doc-title {
+    text-align: center;
+    margin: 16px 0 24px;
+}
+
+.financial-doc-title h2 {
+    font-size: 20px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #0b3d91;
+    margin: 0;
+    letter-spacing: 1px;
+}
+
+.financial-doc-title p {
+    font-size: 12px;
+    color: #829ab1;
+    margin: 4px 0 0;
+    font-style: italic;
+}
+
+.financial-doc-body {
+    margin-bottom: 24px;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.financial-doc-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px dashed #e2e8f0;
+}
+
+.financial-doc-signatures {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    text-align: center;
+    margin-top: 36px;
+    padding-top: 16px;
+}
+
+.signature-role {
+    font-weight: 600;
+    font-size: 13px;
+    color: #102a43;
+}
+
+.signature-note {
+    font-size: 11px;
+    color: #829ab1;
+    font-style: italic;
+    margin-top: 2px;
+}
+
+.signature-space {
+    height: 70px;
+}
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    .accountant-financial-doc, .accountant-financial-doc * {
+        visibility: visible;
+    }
+    .accountant-financial-doc {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        border: none;
+        padding: 0;
+    }
+}
