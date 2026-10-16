@@ -21,7 +21,7 @@ import styles from '@/styles/client.module.scss';
 
 const StudentPayments = () => {
     const user = useAppSelector(state => state.account.user);
-    const data = useStudentData('payments');
+    const data = useStudentData(user._id);
 
     const [search, setSearch] = useState('');
     const [methodFilter, setMethodFilter] = useState<string>();

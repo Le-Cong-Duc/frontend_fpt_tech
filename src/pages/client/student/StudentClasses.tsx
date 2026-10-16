@@ -10,13 +10,15 @@ import {
     UserOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { useAppSelector } from '@/redux/hooks';
 import { StudentEmpty, StudentState, enrollmentCourse, statusTag, useStudentData } from './student.shared';
 import type { IPortalEnrollment } from '@/types/backend';
 import styles from '@/styles/client.module.scss';
 
 const StudentClasses = () => {
     const navigate = useNavigate();
-    const data = useStudentData('enrollments');
+    const user = useAppSelector(state => state.account.user);
+    const data = useStudentData(user._id);
     const [search, setSearch] = useState('');
     const [selected, setSelected] = useState<IPortalEnrollment | null>(null);
 

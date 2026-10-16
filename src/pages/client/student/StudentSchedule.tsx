@@ -8,12 +8,14 @@ import {
     UserOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { useAppSelector } from '@/redux/hooks';
 import { StudentEmpty, StudentState, enrollmentCourse, statusTag, useStudentData } from './student.shared';
 import styles from '@/styles/client.module.scss';
 
 const StudentSchedule = () => {
     const navigate = useNavigate();
-    const data = useStudentData('enrollments');
+    const user = useAppSelector(state => state.account.user);
+    const data = useStudentData(user._id);
     const [search, setSearch] = useState('');
     const [room, setRoom] = useState<string>();
 

@@ -69,13 +69,14 @@ export interface IUserSummary {
 }
 
 export interface IClassroomWithDetails extends Omit<IClassroom, 'course_id' | 'teacher_id'> {
-    course_id?: Pick<ICourse, '_id' | 'name' | 'description' | 'level' | 'duration'>;
+    course_id?: Pick<ICourse, '_id' | 'name' | 'description' | 'level' | 'duration' | 'price'>;
     teacher_id?: IUserSummary;
 }
 
 export interface IPortalEnrollment extends Omit<IEnrollment, 'student_id' | 'class_id'> {
     student_id?: IUserSummary;
     class_id?: IClassroomWithDetails;
+    createdBy?: { _id?: string; email?: string } | string;
 }
 
 export interface IPortalInvoice extends Omit<IInvoice, 'enrollment_id'> {
@@ -92,6 +93,7 @@ export interface IEnrollment {
     class_id: string;
     register_date?: string;
     status?: 'STUDYING' | 'COMPLETED' | 'CANCELLED' | 'WAITING_PAYMENT' | string;
+    createdBy?: { _id?: string; email?: string } | string;
     createdAt?: string;
     updatedAt?: string;
 }
