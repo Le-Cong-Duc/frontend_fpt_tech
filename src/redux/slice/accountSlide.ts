@@ -71,9 +71,13 @@ export const accountSlide = createSlice({
             state.user.name = action.payload.name;
             state.user.role = action?.payload?.role;
             state.user.permissions = action?.payload?.permissions;
+            if (action?.payload?._id) {
+                localStorage.setItem('user_id', action.payload._id);
+            }
         },
         setLogoutAction: (state, action) => {
             localStorage.removeItem('access_token');
+            localStorage.removeItem('user_id');
             state.isAuthenticated = false;
             state.user = {
                 _id: "",
@@ -113,6 +117,9 @@ export const accountSlide = createSlice({
                 state.user.name = action.payload.user?.name;
                 state.user.role = action?.payload?.user?.role;
                 state.user.permissions = action?.payload?.user?.permissions;
+                if (action?.payload?.user?._id) {
+                    localStorage.setItem('user_id', action.payload.user._id);
+                }
             }
         })
 

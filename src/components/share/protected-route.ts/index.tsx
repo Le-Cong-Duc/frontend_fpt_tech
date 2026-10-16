@@ -3,16 +3,18 @@ import { useAppSelector } from "@/redux/hooks";
 import NotPermitted from "./not-permitted";
 import Loading from "../loading";
 
+import { getDefaultRouteForRole, isBackofficeRole } from "@/config/portal";
+
 const RoleBaseRoute = (props: any) => {
     const user = useAppSelector(state => state.account.user);
-    const userRole = user.role.name;
+    const userRole = user.role?.name;
 
-    if (userRole !== 'NORMAL_USER') {
-        return (<>{props.children}</>)
+    if (isBackofficeRole(userRole)) {
+        return (<>{props.children}</>);
     } else {
-        return (<NotPermitted />)
+        return (<Navigate to={getDefaultRouteForRole(userRole)} replace />);
     }
-}
+};
 
 const ProtectedRoute = (props: any) => {
     const isAuthenticated = useAppSelector(state => state.account.isAuthenticated)

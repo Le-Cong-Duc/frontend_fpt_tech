@@ -25,7 +25,7 @@ import LeadPage from './pages/admin/lead';
 import CourseDetail from './pages/client/common/CourseDetail';
 import Loading from './components/share/loading';
 import NotPermitted from './components/share/protected-route.ts/not-permitted';
-import { isAccountantRole } from './config/portal';
+import { getDefaultRouteForRole, getPortalRole, isAccountantRole, isBackofficeRole } from './config/portal';
 import AccountantDashboard from './pages/client/accountant/AccountantDashboard';
 import AccountantTuition from './pages/client/accountant/AccountantTuition';
 import AccountantInvoices from './pages/client/accountant/AccountantInvoices';
@@ -50,7 +50,6 @@ import ManagerStudents from './pages/client/manager/ManagerStudents';
 import ManagerCourses from './pages/client/manager/ManagerCourses';
 import ManagerSchedule from './pages/client/manager/ManagerSchedule';
 import ClientDashboard from './pages/client/dashboard/ClientDashboard';
-import { getPortalRole, isBackofficeRole } from './config/portal';
 import ClientLayout from './pages/client/layout/ClientLayout';
 import StudentCourses from './pages/client/student/StudentCourses';
 import StudentSchedule from './pages/client/student/StudentSchedule';
@@ -76,7 +75,7 @@ const AccountantRoute = ({ children }: { children: ReactNode }) => {
     const { isAuthenticated, isLoading, user } = useAppSelector(state => state.account);
     if (isLoading) return <Loading />;
     if (!isAuthenticated) return <Navigate to="/login" replace />;
-    if (!isAccountantRole(user.role?.name)) return <NotPermitted />;
+    if (!isAccountantRole(user.role?.name)) return <Navigate to={getDefaultRouteForRole(user.role?.name)} replace />;
     return <>{children}</>;
 };
 
@@ -84,42 +83,39 @@ const ConsultantRoute = ({ children }: { children: ReactNode }) => {
     const { isAuthenticated, isLoading, user } = useAppSelector(state => state.account);
     if (isLoading) return <Loading />;
     if (!isAuthenticated) return <Navigate to="/login" replace />;
-    if (getPortalRole(user.role?.name) !== 'CONSULTANT') return <NotPermitted />;
+    if (getPortalRole(user.role?.name) !== 'CONSULTANT') return <Navigate to={getDefaultRouteForRole(user.role?.name)} replace />;
     return <>{children}</>;
 };
 
 const ManagerRoute = ({ children }: { children: ReactNode }) => {
     const { isAuthenticated, isLoading, user } = useAppSelector(state => state.account);
     if (isLoading) return <Loading />;
-    if (!isAuthenticated) return <Navigate to="/login?callback=/client/manager" replace />;
-    if (getPortalRole(user.role?.name) !== 'MANAGER') return <NotPermitted />;
+    if (!isAuthenticated) return <Navigate to="/login" replace />;
+    if (getPortalRole(user.role?.name) !== 'MANAGER') return <Navigate to={getDefaultRouteForRole(user.role?.name)} replace />;
     return <>{children}</>;
 };
 
 const TeacherRoute = ({ children }: { children: ReactNode }) => {
     const { isAuthenticated, isLoading, user } = useAppSelector(state => state.account);
     if (isLoading) return <Loading />;
-    if (!isAuthenticated) return <Navigate to="/login?callback=/client/teacher" replace />;
-    if (getPortalRole(user.role?.name) !== 'TEACHER') return <NotPermitted />;
+    if (!isAuthenticated) return <Navigate to="/login" replace />;
+    if (getPortalRole(user.role?.name) !== 'TEACHER') return <Navigate to={getDefaultRouteForRole(user.role?.name)} replace />;
     return <>{children}</>;
 };
 
 const StudentRoute = ({ children }: { children: ReactNode }) => {
     const { isAuthenticated, isLoading, user } = useAppSelector(state => state.account);
     if (isLoading) return <Loading />;
-    if (!isAuthenticated) return <Navigate to="/login?callback=/client/student" replace />;
-    if (getPortalRole(user.role?.name) !== 'STUDENT') return <NotPermitted />;
+    if (!isAuthenticated) return <Navigate to="/login" replace />;
+    if (getPortalRole(user.role?.name) !== 'STUDENT') return <Navigate to={getDefaultRouteForRole(user.role?.name)} replace />;
     return <>{children}</>;
 };
 
 const ClientRoute = ({ children }: { children: ReactNode }) => {
     const { isAuthenticated, isLoading, user } = useAppSelector(state => state.account);
     if (isLoading) return <Loading />;
-    if (!isAuthenticated) return <Navigate to="/login?callback=/client" replace />;
-    if (isBackofficeRole(user.role?.name)) return <Navigate to="/admin" replace />;
-    if (getPortalRole(user.role?.name) === 'TEACHER') return <Navigate to="/client/teacher" replace />;
-    if (!['STUDENT', 'TEACHER', 'CONSULTANT', 'ACCOUNTANT', 'MANAGER'].includes(getPortalRole(user.role?.name))) return <NotPermitted />;
-    return <>{children}</>;
+    if (!isAuthenticated) return <Navigate to="/login" replace />;
+    return <Navigate to={getDefaultRouteForRole(user.role?.name)} replace />;
 };
 
 const LayoutClient = () => {

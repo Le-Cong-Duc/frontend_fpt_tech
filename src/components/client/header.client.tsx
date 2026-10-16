@@ -6,7 +6,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { callLogout } from '@/config/api';
 import { setLogoutAction } from '@/redux/slice/accountSlide';
-import { getClientMenu, isBackofficeRole } from '@/config/portal';
+import { getClientMenu, getDefaultRouteForRole, isBackofficeRole } from '@/config/portal';
 import styles from '@/styles/client.module.scss';
 
 const Header = () => {
@@ -41,16 +41,21 @@ const Header = () => {
     ];
 
     const handleLogout = async () => {
-        const res = await callLogout();
-        if (res?.data) {
-            dispatch(setLogoutAction({}));
-            message.success('Đăng xuất thành công');
-            navigate('/');
+        try {
+            await callLogout();
+        } catch {
+            // ignore
         }
+        dispatch(setLogoutAction({}));
+        message.success('Đăng xuất thành công');
+        window.location.href = '/login';
     };
 
+    const roleDefaultRoute = getDefaultRouteForRole(user.role?.name);
     const dropdownItems: MenuProps['items'] = [
-        ...(isBackoffice ? [{ label: <Link to="/admin">Trang Quản trị</Link>, key: 'admin', icon: <DashOutlined /> }] : []),
+        ...(isBackoffice
+            ? [{ label: <Link to="/admin">Trang Quản trị</Link>, key: 'admin', icon: <DashOutlined /> }]
+            : [{ label: <Link to={roleDefaultRoute}>Trang Dashboard</Link>, key: 'portal', icon: <DashOutlined /> }]),
         { label: <span onClick={handleLogout}>Đăng xuất</span>, key: 'logout', icon: <LogoutOutlined /> },
     ];
 

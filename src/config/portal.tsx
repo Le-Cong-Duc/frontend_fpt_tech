@@ -19,7 +19,12 @@ export interface ClientMenuItem {
     icon: ReactNode;
 }
 
-const normalizeRole = (value = '') => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+const normalizeRole = (value: any = '') => {
+    if (typeof value === 'object' && value !== null && 'name' in value) {
+        value = value.name;
+    }
+    return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+};
 
 export const isBackofficeRole = (roleName?: string) => {
     const role = normalizeRole(roleName);
@@ -35,6 +40,38 @@ export const getPortalRole = (roleName?: string): PortalRole => {
     if (role.includes('CONSULTANT') || role.includes('TU VAN')) return 'CONSULTANT';
     if (role.includes('ACCOUNTANT') || role.includes('KE TOAN')) return 'ACCOUNTANT';
     return 'STUDENT';
+};
+
+export const getDefaultRouteForRole = (roleName?: string): string => {
+    if (isBackofficeRole(roleName)) return '/admin';
+    const role = getPortalRole(roleName);
+    switch (role) {
+        case 'TEACHER':
+            return '/client/teacher';
+        case 'MANAGER':
+            return '/client/manager';
+        case 'ACCOUNTANT':
+            return '/client/accountant';
+        case 'CONSULTANT':
+            return '/client/consultant';
+        case 'STUDENT':
+        default:
+            return '/client/student';
+    }
+};
+
+export const resolveTargetRoute = (roleName?: string, callback?: string | null): string => {
+    const defaultRoute = getDefaultRouteForRole(roleName);
+    if (!callback) return defaultRoute;
+    try {
+        const decoded = decodeURIComponent(callback);
+        if (decoded.startsWith(defaultRoute)) {
+            return decoded;
+        }
+    } catch {
+        // ignore malformed callback
+    }
+    return defaultRoute;
 };
 
 export const clientMenu: ClientMenuItem[] = [

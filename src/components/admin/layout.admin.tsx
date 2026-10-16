@@ -88,13 +88,15 @@ const LayoutAdmin = () => {
     }, [location])
 
     const handleLogout = async () => {
-        const res = await callLogout();
-        if (res && res.data) {
-            dispatch(setLogoutAction({}));
-            message.success('Đăng xuất thành công');
-            navigate('/')
+        try {
+            await callLogout();
+        } catch {
+            // ignore
         }
-    }
+        dispatch(setLogoutAction({}));
+        message.success('Đăng xuất thành công');
+        window.location.href = '/login';
+    };
 
     // if (isMobile) {
     //     items.push({

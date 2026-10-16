@@ -23,9 +23,13 @@ const ClientUserMenu = () => {
     const handleClick: MenuProps['onClick'] = async ({ key }) => {
         if (key === 'profile') navigate(profilePath);
         if (key === 'logout') {
-            await callLogout();
+            try {
+                await callLogout();
+            } catch {
+                // ignore
+            }
             dispatch(setLogoutAction({}));
-            navigate('/login', { replace: true });
+            window.location.href = '/login';
         }
     };
     return <Dropdown menu={{ items, onClick: handleClick }} trigger={['click']} placement="bottomRight"><button className="client-user-trigger" type="button" aria-label="Tài khoản người dùng"><span className="client-user-copy"><b>{user.name || 'Tài khoản'}</b><small>{roleLabels[role]}</small></span><Avatar>{user.name?.slice(0, 1).toUpperCase() || '?'}</Avatar></button></Dropdown>;

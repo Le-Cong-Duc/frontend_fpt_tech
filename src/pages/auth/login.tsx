@@ -6,7 +6,7 @@ import { useDispatch } from 'react-redux';
 import { setUserLoginInfo } from '@/redux/slice/accountSlide';
 import styles from 'styles/auth.module.scss';
 import { useAppSelector } from '@/redux/hooks';
-import { isBackofficeRole } from '@/config/portal';
+import { isBackofficeRole, resolveTargetRoute } from '@/config/portal';
 
 const LoginPage = () => {
     const navigate = useNavigate();
@@ -19,11 +19,11 @@ const LoginPage = () => {
     const callback = params?.get("callback");
 
     useEffect(() => {
-        //đã login => redirect to '/'
+        // đã login => redirect to role dashboard
         if (isAuthenticated) {
-            window.location.href = isBackofficeRole(user.role?.name) ? '/admin' : '/client';
+            window.location.href = resolveTargetRoute(user.role?.name, callback);
         }
-    }, [])
+    }, [isAuthenticated, user, callback]);
 
     const onFinish = async (values: any) => {
         const { username, password } = values;
@@ -32,9 +32,12 @@ const LoginPage = () => {
         setIsSubmit(false);
         if (res?.data) {
             localStorage.setItem('access_token', res.data.access_token);
-            dispatch(setUserLoginInfo(res.data.user))
+            if (res.data.user?._id) {
+                localStorage.setItem('user_id', res.data.user._id);
+            }
+            dispatch(setUserLoginInfo(res.data.user));
             message.success('Đăng nhập tài khoản thành công!');
-            window.location.href = callback ? callback : (isBackofficeRole(res.data.user.role?.name) ? '/admin' : '/client');
+            window.location.href = resolveTargetRoute(res.data.user?.role?.name, callback);
         } else {
             notification.error({
                 message: "Có lỗi xảy ra",
