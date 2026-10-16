@@ -134,6 +134,7 @@ export const callUpdateUser = (value: Partial<IUser>, id: string) => update<IUse
 export const callDeleteUser = (id: string) => remove<IUser>('users', id);
 export const callFetchUser = (query = '') => list<IUser>('users', query);
 export const callFetchUserById = (id: string) => findById<IUser>('users', id);
+export const callFetchContacts = (query = '') => list<IUser>('users/contacts', query);
 
 export const callCreateRole = (value: Omit<IRole, '_id'>) => create<IRole>('roles', value);
 export const callUpdateRole = (value: Partial<IRole>, id: string) => update<IRole>('roles', id, value);
@@ -152,6 +153,7 @@ export const callUpdateConversation = (value: Partial<IConversation>, id: string
 export const callDeleteConversation = (id: string) => remove<IConversation>('conversations', id);
 export const callFetchConversation = (query = '') => list<IConversation>('conversations', query);
 export const callFetchConversationById = (id: string) => findById<IConversation>('conversations', id);
+export const callFetchMyConversations = () => axios.get<IBackendRes<IConversation[]>>(`${API_PREFIX}/conversations/my-conversations`);
 
 export const callCreateMessage = (value: Omit<IMessage, '_id'>) => create<IMessage>('messages', value);
 export const callUpdateMessage = (value: Partial<IMessage>, id: string) => update<IMessage>('messages', id, value);

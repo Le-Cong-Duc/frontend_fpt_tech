@@ -58,6 +58,7 @@ import StudentPayments from './pages/client/student/StudentPayments';
 import StudentProfile from './pages/client/student/StudentProfile';
 import StudentClasses from './pages/client/student/StudentClasses';
 import Profile from './pages/client/common/Profile';
+import ChatPage from './pages/client/common/Chat';
 import ManagerClassDetail from './pages/client/manager/ManagerClassDetail';
 
 const BackendModulePage = ({ title, endpoint }: { title: string; endpoint: string }) => (
@@ -167,6 +168,7 @@ export default function App() {
                 { path: 'schedule', element: <StudentRoute><StudentSchedule /></StudentRoute> },
                 { path: 'invoices', element: <StudentRoute><StudentInvoices /></StudentRoute> },
                 { path: 'payments', element: <StudentRoute><StudentPayments /></StudentRoute> },
+                { path: 'chat', element: <StudentRoute><ChatPage /></StudentRoute> },
                 { path: 'profile', element: <StudentRoute><StudentProfile /></StudentRoute> },
             ],
         },
@@ -200,6 +202,7 @@ export default function App() {
                 { path: 'invoices', element: <AccountantRoute><AccountantInvoices /></AccountantRoute> },
                 { path: 'payments', element: <AccountantRoute><AccountantPayments /></AccountantRoute> },
                 { path: 'revenue', element: <AccountantRoute><AccountantRevenue /></AccountantRoute> },
+                { path: 'chat', element: <AccountantRoute><ChatPage /></AccountantRoute> },
                 { path: 'profile', element: <AccountantRoute><Profile /></AccountantRoute> },
             ],
         },
@@ -213,7 +216,7 @@ export default function App() {
                 { path: 'courses', element: <ConsultantRoute><ConsultantCourses /></ConsultantRoute> },
                 { path: 'enrollments', element: <ConsultantRoute><ConsultantEnrollments /></ConsultantRoute> },
                 { path: 'follow-up', element: <ConsultantRoute><ConsultantFollowUp /></ConsultantRoute> },
-                { path: 'chat', element: <ConsultantRoute><ConsultantChat /></ConsultantRoute> },
+                { path: 'chat', element: <ConsultantRoute><ChatPage /></ConsultantRoute> },
                 { path: 'profile', element: <ConsultantRoute><Profile /></ConsultantRoute> },
             ],
         },
@@ -227,7 +230,7 @@ export default function App() {
                 { path: 'classes', element: <TeacherRoute><TeacherClasses /></TeacherRoute> },
                 { path: 'students', element: <TeacherRoute><TeacherStudents /></TeacherRoute> },
                 { path: 'schedule', element: <TeacherRoute><TeacherSchedule /></TeacherRoute> },
-                { path: 'chat', element: <TeacherRoute><TeacherChat /></TeacherRoute> },
+                { path: 'chat', element: <TeacherRoute><ChatPage /></TeacherRoute> },
                 { path: 'profile', element: <TeacherRoute><Profile /></TeacherRoute> },
             ],
         },
@@ -243,6 +246,7 @@ export default function App() {
                 { path: 'students', element: <ManagerRoute><ManagerStudents /></ManagerRoute> },
                 { path: 'courses', element: <ManagerRoute><ManagerCourses /></ManagerRoute> },
                 { path: 'schedule', element: <ManagerRoute><ManagerSchedule /></ManagerRoute> },
+                { path: 'chat', element: <ManagerRoute><ChatPage /></ManagerRoute> },
                 { path: 'profile', element: <ManagerRoute><Profile /></ManagerRoute> },
             ],
         },
