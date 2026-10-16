@@ -92,6 +92,8 @@ export interface IEnrollment {
     class_id: string;
     register_date?: string;
     status?: 'STUDYING' | 'COMPLETED' | 'CANCELLED' | 'WAITING_PAYMENT' | string;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export interface IInvoice {
@@ -101,6 +103,8 @@ export interface IInvoice {
     discount_amount?: number;
     final_amount?: number;
     status?: string;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export interface IPayment {
@@ -108,6 +112,8 @@ export interface IPayment {
     invoice_id: string;
     payment_method?: string;
     payment_date?: string;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export interface ILead {

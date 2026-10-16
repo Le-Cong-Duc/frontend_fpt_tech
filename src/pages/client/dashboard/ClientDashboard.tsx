@@ -70,7 +70,13 @@ const ClientDashboard = () => {
     }, [data, role]);
 
     const quickActions: Record<PortalRole, { label: string; description: string; icon: JSX.Element; to: string }[]> = {
-        STUDENT: [{ label: 'Khóa học', description: 'Khóa học của tôi', icon: <BookOutlined />, to: '/client/student/courses' }, { label: 'Lịch học', description: 'Lịch sắp tới', icon: <CalendarOutlined />, to: '/client/student/schedule' }, { label: 'Hóa đơn', description: 'Khoản cần thanh toán', icon: <FileTextOutlined />, to: '/client/student/invoices' }, { label: 'Thanh toán', description: 'Lịch sử giao dịch', icon: <CreditCardOutlined />, to: '/client/student/payments' }],
+        STUDENT: [
+            { label: 'Khóa học', description: 'Khóa học của tôi', icon: <BookOutlined />, to: '/client/student/courses' },
+            { label: 'Lớp học', description: 'Lớp đang tham gia', icon: <TeamOutlined />, to: '/client/student/classes' },
+            { label: 'Lịch học', description: 'Lịch sắp tới', icon: <CalendarOutlined />, to: '/client/student/schedule' },
+            { label: 'Hóa đơn', description: 'Khoản cần thanh toán', icon: <FileTextOutlined />, to: '/client/student/invoices' },
+            { label: 'Thanh toán', description: 'Lịch sử giao dịch', icon: <CreditCardOutlined />, to: '/client/student/payments' },
+        ],
         TEACHER: [{ label: 'Khóa học', description: 'Khóa học phụ trách', icon: <BookOutlined />, to: '/client/teacher/courses' }, { label: 'Lớp học', description: 'Lớp đang phụ trách', icon: <TeamOutlined />, to: '/client/teacher/classes' }, { label: 'Học viên', description: 'Danh sách học viên', icon: <UserOutlined />, to: '/client/teacher/students' }, { label: 'Lịch dạy', description: 'Lịch giảng dạy', icon: <CalendarOutlined />, to: '/client/teacher/schedule' }, { label: 'Chat', description: 'Trao đổi với học viên', icon: <MessageOutlined />, to: '/client/teacher/chat' }],
         CONSULTANT: [{ label: 'Khách hàng', description: 'Lead được giao', icon: <UserOutlined />, to: '/client/consultant/customers' }, { label: 'Khóa học', description: 'Tư vấn chương trình', icon: <BookOutlined />, to: '/client/consultant/courses' }, { label: 'Đăng ký học', description: 'Tạo đăng ký', icon: <TeamOutlined />, to: '/client/consultant/enrollments' }, { label: 'Follow-up', description: 'Pipeline khách hàng', icon: <CalendarOutlined />, to: '/client/consultant/follow-up' }],
         ACCOUNTANT: [{ label: 'Học phí', description: 'Theo dõi công nợ', icon: <RiseOutlined />, to: '/client/accountant/tuition' }, { label: 'Hóa đơn', description: 'Quản lý hóa đơn', icon: <FileTextOutlined />, to: '/client/accountant/invoices' }, { label: 'Thanh toán', description: 'Lịch sử giao dịch', icon: <CreditCardOutlined />, to: '/client/accountant/payments' }, { label: 'Doanh thu', description: 'Báo cáo doanh thu', icon: <RiseOutlined />, to: '/client/accountant/revenue' }],
