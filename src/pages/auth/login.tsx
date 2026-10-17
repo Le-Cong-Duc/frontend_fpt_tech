@@ -1,25 +1,45 @@
-import { Button, Divider, Form, Input, message, notification } from 'antd';
+import { useEffect, useState } from 'react';
+import { Button, Checkbox, Form, Input, message, notification } from 'antd';
+import {
+    ArrowLeftOutlined,
+    CheckCircleFilled,
+    CrownOutlined,
+    LockOutlined,
+    MailOutlined,
+    RocketOutlined,
+    SafetyCertificateOutlined,
+    TeamOutlined,
+    UserOutlined,
+} from '@ant-design/icons';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { callLogin } from 'config/api';
-import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
+import { callLogin } from '@/config/api';
 import { setUserLoginInfo } from '@/redux/slice/accountSlide';
-import styles from 'styles/auth.module.scss';
 import { useAppSelector } from '@/redux/hooks';
-import { isBackofficeRole, resolveTargetRoute } from '@/config/portal';
+import { resolveTargetRoute } from '@/config/portal';
+import styles from '@/styles/auth.module.scss';
+
+const DEMO_ACCOUNTS = [
+    { label: 'Admin', email: 'admin@gmail.com', icon: <CrownOutlined style={{ color: '#ea580c' }} /> },
+    { label: 'Giảng viên', email: 'teacher@gmail.com', icon: <TeamOutlined style={{ color: '#0284c7' }} /> },
+    { label: 'Học viên', email: 'student@gmail.com', icon: <UserOutlined style={{ color: '#10b981' }} /> },
+    { label: 'Tư vấn viên', email: 'consultant@gmail.com', icon: <UserOutlined style={{ color: '#8b5cf6' }} /> },
+    { label: 'Kế toán', email: 'accountant@gmail.com', icon: <UserOutlined style={{ color: '#f59e0b' }} /> },
+];
 
 const LoginPage = () => {
     const navigate = useNavigate();
-    const [isSubmit, setIsSubmit] = useState(false);
     const dispatch = useDispatch();
+    const [form] = Form.useForm();
+    const [isSubmit, setIsSubmit] = useState(false);
     const { isAuthenticated, user } = useAppSelector(state => state.account);
 
-    let location = useLocation();
-    let params = new URLSearchParams(location.search);
-    const callback = params?.get("callback");
+    const location = useLocation();
+    const params = new URLSearchParams(location.search);
+    const callback = params?.get('callback');
 
     useEffect(() => {
-        // đã login => redirect to role dashboard
+        // Nếu đã đăng nhập thì tự động chuyển hướng về đúng dashboard theo role
         if (isAuthenticated) {
             window.location.href = resolveTargetRoute(user.role?.name, callback);
         }
@@ -28,80 +48,201 @@ const LoginPage = () => {
     const onFinish = async (values: any) => {
         const { username, password } = values;
         setIsSubmit(true);
-        const res = await callLogin(username, password);
-        setIsSubmit(false);
-        if (res?.data) {
-            localStorage.setItem('access_token', res.data.access_token);
-            if (res.data.user?._id) {
-                localStorage.setItem('user_id', res.data.user._id);
+        try {
+            const res = await callLogin(username, password);
+            if (res?.data) {
+                localStorage.setItem('access_token', res.data.access_token);
+                if (res.data.user?._id) {
+                    localStorage.setItem('user_id', res.data.user._id);
+                }
+                dispatch(setUserLoginInfo(res.data.user));
+                message.success('Đăng nhập tài khoản thành công!');
+                window.location.href = resolveTargetRoute(res.data.user?.role?.name, callback);
+            } else {
+                notification.error({
+                    message: 'Đăng nhập không thành công',
+                    description: res.message && Array.isArray(res.message) ? res.message[0] : res.message || 'Email hoặc mật khẩu không chính xác',
+                    duration: 5,
+                });
             }
-            dispatch(setUserLoginInfo(res.data.user));
-            message.success('Đăng nhập tài khoản thành công!');
-            window.location.href = resolveTargetRoute(res.data.user?.role?.name, callback);
-        } else {
+        } catch {
             notification.error({
-                message: "Có lỗi xảy ra",
-                description:
-                    res.message && Array.isArray(res.message) ? res.message[0] : res.message,
-                duration: 5
-            })
+                message: 'Lỗi kết nối',
+                description: 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại mạng hoặc thử lại sau.',
+                duration: 5,
+            });
+        } finally {
+            setIsSubmit(false);
         }
     };
 
+    const handleSelectDemo = (email: string) => {
+        form.setFieldsValue({
+            username: email,
+            password: 'password', // Mật khẩu mẫu mặc định cho database seed
+        });
+        message.info(`Đã chọn tài khoản mẫu: ${email}`);
+    };
 
     return (
-        <div className={styles["login-page"]}>
-            <main className={styles.main}>
-                <div className={styles.container}>
-                    <section className={styles.wrapper}>
-                        <div className={styles.heading}>
-                            <h2 className={`${styles.text} ${styles["text-large"]}`}>Đăng Nhập</h2>
-                            <Divider />
+        <div className={styles['auth-container']}>
+            <div className={styles['auth-card']}>
+                {/* Left Side: Brand & Showcase */}
+                <div className={styles['auth-banner']}>
+                    <div>
+                        <Link to="/" className={styles['back-home-link']}>
+                            <ArrowLeftOutlined /> Quay lại Trang Chủ
+                        </Link>
+                    </div>
 
+                    <div className={styles['banner-brand']}>
+                        <div className={styles['brand-badge']}>
+                            <RocketOutlined />
                         </div>
-                        <Form
-                            name="basic"
-                            // style={{ maxWidth: 600, margin: '0 auto' }}
-                            onFinish={onFinish}
-                            autoComplete="off"
-                        >
-                            <Form.Item
-                                labelCol={{ span: 24 }} //whole column
-                                label="Email"
-                                name="username"
-                                rules={[{ required: true, message: 'Email không được để trống!' }]}
-                            >
-                                <Input />
-                            </Form.Item>
+                        <div className={styles['brand-text']}>
+                            <span className={styles['brand-name']}>FPT LANGUAGE CENTER</span>
+                            <span className={styles['brand-sub']}>Hệ Thống Đào Tạo Ngoại Ngữ Chuẩn Quốc Tế</span>
+                        </div>
+                    </div>
 
-                            <Form.Item
-                                labelCol={{ span: 24 }} //whole column
-                                label="Mật khẩu"
-                                name="password"
-                                rules={[{ required: true, message: 'Mật khẩu không được để trống!' }]}
-                            >
-                                <Input.Password />
-                            </Form.Item>
+                    <div className={styles['banner-main']}>
+                        <span className={styles['badge-tag']}>
+                            <SafetyCertificateOutlined /> CỔNG HỌC VỤ & ĐÀO TẠO
+                        </span>
+                        <h2>
+                            Làm Chủ Ngoại Ngữ, <br />
+                            <span className={styles['highlight']}>Bứt Phá Tương Lai Toàn Cầu</span>
+                        </h2>
+                        <p>
+                            Nền tảng quản lý đào tạo thông minh kết nối học viên, giảng viên và đội ngũ hỗ trợ học vụ 24/7.
+                        </p>
 
-                            <Form.Item
-                            // wrapperCol={{ offset: 6, span: 16 }}
-                            >
-                                <Button type="primary" htmlType="submit" loading={isSubmit}>
-                                    Đăng nhập
-                                </Button>
-                            </Form.Item>
-                            <Divider>Or</Divider>
-                            <p className="text text-normal">Chưa có tài khoản ?
-                                <span>
-                                    <Link to='/register' > Đăng Ký </Link>
-                                </span>
-                            </p>
-                        </Form>
-                    </section>
+                        <div className={styles['feature-list']}>
+                            <div className={styles['feature-item']}>
+                                <CheckCircleFilled />
+                                <span>Quản lý lịch học, lớp học & điểm danh minh bạch</span>
+                            </div>
+                            <div className={styles['feature-item']}>
+                                <CheckCircleFilled />
+                                <span>Trao đổi tin nhắn trực tiếp realtime với giảng viên</span>
+                            </div>
+                            <div className={styles['feature-item']}>
+                                <CheckCircleFilled />
+                                <span>Luyện phát âm AI & làm bài kiểm tra chuẩn khảo thí</span>
+                            </div>
+                            <div className={styles['feature-item']}>
+                                <CheckCircleFilled />
+                                <span>Theo dõi hóa đơn, học phí và nhận học bổng ưu đãi</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className={styles['banner-footer']}>
+                        <span>
+                            <SafetyCertificateOutlined /> Bảo mật SSL 256-bit
+                        </span>
+                        <span>FPT Education Group © 2026</span>
+                    </div>
                 </div>
-            </main>
+
+                {/* Right Side: Login Form */}
+                <div className={styles['auth-form-wrapper']}>
+                    <div className={styles['form-header']}>
+                        <h2>Đăng Nhập Tài Khoản</h2>
+                        <p>Vui lòng nhập thông tin để truy cập cổng thông tin học vụ FPT</p>
+                    </div>
+
+                    <Form
+                        form={form}
+                        name="loginForm"
+                        layout="vertical"
+                        onFinish={onFinish}
+                        autoComplete="off"
+                        className={styles['form-content']}
+                        initialValues={{ remember: true }}
+                    >
+                        <Form.Item
+                            label="Email tài khoản"
+                            name="username"
+                            rules={[
+                                { required: true, message: 'Vui lòng nhập địa chỉ email!' },
+                                { type: 'email', message: 'Địa chỉ email không đúng định dạng!' },
+                            ]}
+                        >
+                            <Input
+                                prefix={<MailOutlined />}
+                                placeholder="name@gmail.com"
+                                size="large"
+                            />
+                        </Form.Item>
+
+                        <Form.Item
+                            label="Mật khẩu"
+                            name="password"
+                            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu!' }]}
+                        >
+                            <Input.Password
+                                prefix={<LockOutlined />}
+                                placeholder="••••••••"
+                                size="large"
+                            />
+                        </Form.Item>
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                            <Form.Item name="remember" valuePropName="checked" noStyle>
+                                <Checkbox style={{ fontSize: 13, color: '#475569' }}>Ghi nhớ đăng nhập</Checkbox>
+                            </Form.Item>
+                            <a
+                                href="tel:19006600"
+                                style={{ fontSize: 13, color: '#f97316', textDecoration: 'none', fontWeight: 600 }}
+                                title="Gọi hotline để được cấp lại mật khẩu"
+                            >
+                                Quên mật khẩu?
+                            </a>
+                        </div>
+
+                        <button
+                            type="submit"
+                            className={styles['auth-submit-btn']}
+                            disabled={isSubmit}
+                        >
+                            {isSubmit ? (
+                                'Đang xác thực tài khoản...'
+                            ) : (
+                                <>
+                                    <RocketOutlined /> ĐĂNG NHẬP HỆ THỐNG
+                                </>
+                            )}
+                        </button>
+                    </Form>
+
+                    {/* Quick Demo Accounts Selection */}
+                    <div className={styles['demo-accounts-box']}>
+                        <div className={styles['demo-title']}>
+                            <CrownOutlined style={{ color: '#f97316' }} /> Tài khoản thử nghiệm nhanh (Click để chọn):
+                        </div>
+                        <div className={styles['demo-chips']}>
+                            {DEMO_ACCOUNTS.map(acc => (
+                                <button
+                                    key={acc.email}
+                                    type="button"
+                                    className={styles['demo-chip']}
+                                    onClick={() => handleSelectDemo(acc.email)}
+                                >
+                                    {acc.icon} {acc.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className={styles['form-footer']}>
+                        Chưa có tài khoản học viên?
+                        <Link to="/register">Đăng ký ngay</Link>
+                    </div>
+                </div>
+            </div>
         </div>
-    )
-}
+    );
+};
 
 export default LoginPage;
