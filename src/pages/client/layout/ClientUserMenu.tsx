@@ -1,10 +1,10 @@
-import { LogoutOutlined, UserOutlined } from '@ant-design/icons';
+import { HomeOutlined, LogoutOutlined } from '@ant-design/icons';
 import { Avatar, Dropdown, Tag, type MenuProps } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { callLogout } from '@/config/api';
 import { setLogoutAction } from '@/redux/slice/accountSlide';
-import { getClientProfilePath, getPortalRole } from '@/config/portal';
+import { getPortalRole } from '@/config/portal';
 
 const roleLabels = { STUDENT: 'Học viên', TEACHER: 'Giảng viên', CONSULTANT: 'Tư vấn viên', ACCOUNTANT: 'Kế toán', MANAGER: 'Quản lý' } as const;
 
@@ -13,15 +13,14 @@ const ClientUserMenu = () => {
     const dispatch = useAppDispatch();
     const user = useAppSelector(state => state.account.user);
     const role = getPortalRole(user.role?.name);
-    const profilePath = getClientProfilePath(user.role?.name);
     const items: MenuProps['items'] = [
         { key: 'identity', disabled: true, label: <div><strong>{user.name || 'Tài khoản'}</strong><br /><Tag color="blue">{roleLabels[role]}</Tag></div> },
         { type: 'divider' },
-        { key: 'profile', icon: <UserOutlined />, label: 'Thông tin cá nhân' },
+        { key: 'home', icon: <HomeOutlined />, label: 'Trở về trang chủ' },
         { key: 'logout', icon: <LogoutOutlined />, label: 'Đăng xuất' },
     ];
     const handleClick: MenuProps['onClick'] = async ({ key }) => {
-        if (key === 'profile') navigate(profilePath);
+        if (key === 'home') navigate('/');
         if (key === 'logout') {
             try {
                 await callLogout();

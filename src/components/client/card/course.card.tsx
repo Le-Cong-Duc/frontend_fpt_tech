@@ -587,7 +587,7 @@ const CourseCard = () => {
                                                     className={styles['btn-details']}
                                                     onClick={() => course._id && navigate(`/client/courses/${course._id}`)}
                                                 >
-                                                    Chi tiết
+                                                    Mua ngay
                                                 </button>
                                                 <button
                                                     type="button"

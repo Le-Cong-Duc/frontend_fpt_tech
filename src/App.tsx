@@ -23,6 +23,7 @@ import InvoicePage from './pages/admin/invoice';
 import PaymentPage from './pages/admin/payment';
 import LeadPage from './pages/admin/lead';
 import CourseDetail from './pages/client/common/CourseDetail';
+import CourseCheckout from './pages/client/common/CourseCheckout';
 import Loading from './components/share/loading';
 import NotPermitted from './components/share/protected-route.ts/not-permitted';
 import { getDefaultRouteForRole, getPortalRole, isAccountantRole, isBackofficeRole } from './config/portal';
@@ -156,6 +157,7 @@ export default function App() {
             children: [{ index: true, element: <CourseCard /> }],
         },
         { path: '/client/courses/:id', element: <LayoutApp><LayoutClient /></LayoutApp>, errorElement: <NotFound />, children: [{ index: true, element: <CourseDetail /> }] },
+        { path: '/client/courses/:id/checkout', element: <LayoutApp><LayoutClient /></LayoutApp>, errorElement: <NotFound />, children: [{ index: true, element: <CourseCheckout /> }] },
         { path: '/client', element: <LayoutApp><ClientLayout /></LayoutApp>, errorElement: <NotFound />, children: [{ index: true, element: <ClientRoute><ClientDashboard /></ClientRoute> }] },
         {
             path: '/client/student',

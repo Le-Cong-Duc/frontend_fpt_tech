@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Alert, Button, Empty, Spin } from 'antd';
-import { ArrowLeftOutlined, BookOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, BookOutlined, CreditCardOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { callFetchCourseById } from '@/config/api';
 import type { ICourse } from '@/types/backend';
@@ -62,6 +62,33 @@ const CourseDetail = () => {
                     <span><b>Cấp độ</b>{course.level || 'Mọi trình độ'}</span>
                     <span><b>Thời lượng</b>{course.duration || 'Linh hoạt'}</span>
                     <span><b>Học phí</b>{course.price ? `${Number(course.price).toLocaleString('vi-VN')} đ` : 'Liên hệ'}</span>
+                </div>
+                <h2>Chi tiết chương trình</h2>
+                <p>{course.description || 'Thông tin chi tiết của chương trình sẽ được trung tâm cập nhật sớm nhất.'}</p>
+                <div className={styles['detail-extra-grid']}>
+                    <article>
+                        <b>Mã khóa học</b>
+                        <span>{course._id || 'Đang cập nhật'}</span>
+                    </article>
+                    <article>
+                        <b>Trạng thái tuyển sinh</b>
+                        <span>{course.status || 'Đang cập nhật'}</span>
+                    </article>
+                    <article>
+                        <b>Đối tượng phù hợp</b>
+                        <span>Học viên ở trình độ {course.level || 'phù hợp với chương trình'}.</span>
+                    </article>
+                </div>
+                <h2>Quy trình đăng ký</h2>
+                <ol className={styles['detail-registration-steps']}>
+                    <li>Kiểm tra thông tin và học phí của khóa học.</li>
+                    <li>Chọn “Thanh toán” để đến trang xác nhận học phí.</li>
+                    <li>Quét mã QR khi hệ thống thanh toán được kích hoạt.</li>
+                </ol>
+                <div className={styles['detail-actions']}>
+                    <Button type="primary" size="large" icon={<CreditCardOutlined />} onClick={() => navigate(`/client/courses/${id}/checkout`)}>
+                        Thanh toán
+                    </Button>
                 </div>
             </section>
         </main>

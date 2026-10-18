@@ -57,7 +57,7 @@ export const getDefaultRouteForRole = (roleName?: string): string => {
             return '/client/consultant';
         case 'STUDENT':
         default:
-            return '/client/student';
+            return '/';
     }
 };
 
@@ -66,7 +66,9 @@ export const resolveTargetRoute = (roleName?: string, callback?: string | null):
     if (!callback) return defaultRoute;
     try {
         const decoded = decodeURIComponent(callback);
-        if (decoded.startsWith(defaultRoute)) {
+        const role = getPortalRole(roleName);
+        const roleRoot = isBackofficeRole(roleName) ? '/admin' : `/client/${role.toLowerCase()}`;
+        if (decoded === roleRoot || decoded.startsWith(`${roleRoot}/`)) {
             return decoded;
         }
     } catch {

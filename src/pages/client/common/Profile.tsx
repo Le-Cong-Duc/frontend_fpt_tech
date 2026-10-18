@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, Button, Card, Descriptions, Form, Input, message } from 'antd';
+import { Button, Card, Descriptions, Form, Input, message } from 'antd';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { callUpdateMyProfile } from '@/config/api';
 import { getPortalRole } from '@/config/portal';
@@ -109,6 +109,7 @@ const Profile = () => {
                     </div>
                 )}
             </Card>
+
         </main>
     );
 };

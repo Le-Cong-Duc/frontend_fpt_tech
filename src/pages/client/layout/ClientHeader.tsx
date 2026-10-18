@@ -5,6 +5,7 @@ import ClientUserMenu from './ClientUserMenu';
 import styles from '@/styles/client.module.scss';
 
 const titles: Record<string, string> = {
+    '/client/student/courses': 'Khóa học của tôi',
     '/client': 'Dashboard',
     '/client/student/classes': 'Lớp học của tôi',
     '/client/student/profile': 'Thông tin cá nhân',

@@ -17,7 +17,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { callLogout } from '@/config/api';
 import { setLogoutAction } from '@/redux/slice/accountSlide';
-import { getClientMenu, getDefaultRouteForRole, isBackofficeRole } from '@/config/portal';
+import { getClientMenu, getDefaultRouteForRole, getPortalRole, isBackofficeRole } from '@/config/portal';
 import styles from '@/styles/client.module.scss';
 
 const Header = () => {
@@ -71,7 +71,7 @@ const Header = () => {
             key: 'roadmap',
         },
         {
-            label: <span onClick={() => scrollToSection('advantages')}>Lợi Thế FPT</span>,
+            label: <span onClick={() => scrollToSection('advantages')}>Lợi Thế</span>,
             key: 'advantages',
         },
         {
@@ -106,11 +106,12 @@ const Header = () => {
         window.location.href = '/login';
     };
 
-    const roleDefaultRoute = getDefaultRouteForRole(user.role?.name);
+    const defaultRoute = getDefaultRouteForRole(user.role?.name);
+    const roleDefaultRoute = getPortalRole(user.role?.name) === 'STUDENT' ? '/client/student' : defaultRoute;
     const dropdownItems: MenuProps['items'] = [
         ...(isBackoffice
             ? [{ label: <Link to="/admin">Trang Quản trị Hệ Thống</Link>, key: 'admin', icon: <DashOutlined /> }]
-            : [{ label: <Link to={roleDefaultRoute}>Trang Dashboard Học Vụ</Link>, key: 'portal', icon: <DashOutlined /> }]),
+            : [{ label: <Link to={roleDefaultRoute}>Không gian học tập</Link>, key: 'portal', icon: <DashOutlined /> }]),
         { label: <span onClick={handleLogout}>Đăng xuất</span>, key: 'logout', icon: <LogoutOutlined /> },
     ];
 
