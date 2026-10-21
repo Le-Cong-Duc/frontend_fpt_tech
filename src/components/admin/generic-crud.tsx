@@ -38,7 +38,7 @@ const configs: Record<CrudModule, { title: string; fields: FieldConfig[]; permis
             { name: 'room', label: 'Phòng học', required: true }, { name: 'class_name', label: 'Tên lớp', required: true },
             { name: 'max_student', label: 'Số học viên tối đa', type: 'number', required: true },
             { name: 'start_time', label: 'Thời gian bắt đầu', required: true }, { name: 'end_time', label: 'Thời gian kết thúc', required: true },
-            { name: 'status', label: 'Trạng thái', type: 'select', options: [{ label: 'OPEN', value: 'OPEN' }, { label: 'COMPLETED', value: 'COMPLETED' }, { label: 'CANCELLED', value: 'CANCELLED' }] },
+            { name: 'status', label: 'Trạng thái', type: 'select', options: [{ label: 'OPEN', value: 'OPEN' }, { label: 'FULL', value: 'FULL' }, { label: 'COMPLETED', value: 'COMPLETED' }, { label: 'CANCELLED', value: 'CANCELLED' }] },
         ],
     },
     enrollments: {

@@ -51,6 +51,7 @@ import ManagerStudents from './pages/client/manager/ManagerStudents';
 import ManagerCourses from './pages/client/manager/ManagerCourses';
 import ManagerSchedule from './pages/client/manager/ManagerSchedule';
 import ClientDashboard from './pages/client/dashboard/ClientDashboard';
+import StudentDashboard from './pages/client/dashboard/StudentDashboard';
 import ClientLayout from './pages/client/layout/ClientLayout';
 import StudentCourses from './pages/client/student/StudentCourses';
 import StudentSchedule from './pages/client/student/StudentSchedule';
@@ -61,13 +62,7 @@ import StudentClasses from './pages/client/student/StudentClasses';
 import Profile from './pages/client/common/Profile';
 import ChatPage from './pages/client/common/Chat';
 import ManagerClassDetail from './pages/client/manager/ManagerClassDetail';
-
-const BackendModulePage = ({ title, endpoint }: { title: string; endpoint: string }) => (
-    <div style={{ padding: 24 }}>
-        <h1>{title}</h1>
-        <p>Module route is ready for the {endpoint} API.</p>
-    </div>
-);
+import LeadConsultationProvider from './components/client/LeadConsultationProvider';
 
 const ProtectedModuleRoute = ({ children }: { children: ReactNode }) => (
     <ProtectedRoute>{children}</ProtectedRoute>
@@ -130,6 +125,7 @@ const LayoutClient = () => {
     }, [location]);
 
     return (
+      <LeadConsultationProvider>
         <div className="layout-app" ref={rootRef}>
             <Header />
             <div className={styles['content-app']}>
@@ -137,6 +133,7 @@ const LayoutClient = () => {
             </div>
             <Footer />
         </div>
+      </LeadConsultationProvider>
     );
 };
 
@@ -164,7 +161,7 @@ export default function App() {
             element: <LayoutApp><ClientLayout /></LayoutApp>,
             errorElement: <NotFound />,
             children: [
-                { index: true, element: <StudentRoute><ClientDashboard /></StudentRoute> },
+                { index: true, element: <StudentRoute><StudentDashboard /></StudentRoute> },
                 { path: 'courses', element: <StudentRoute><StudentCourses /></StudentRoute> },
                 { path: 'classes', element: <StudentRoute><StudentClasses /></StudentRoute> },
                 { path: 'schedule', element: <StudentRoute><StudentSchedule /></StudentRoute> },
@@ -189,9 +186,6 @@ export default function App() {
                 { path: 'invoices', element: <ProtectedModuleRoute><InvoicePage /></ProtectedModuleRoute> },
                 { path: 'payments', element: <ProtectedModuleRoute><PaymentPage /></ProtectedModuleRoute> },
                 { path: 'leads', element: <ProtectedModuleRoute><LeadPage /></ProtectedModuleRoute> },
-                { path: 'conversations', element: <ProtectedModuleRoute><BackendModulePage title="Conversations" endpoint="/conversations" /></ProtectedModuleRoute> },
-                { path: 'messages', element: <ProtectedModuleRoute><BackendModulePage title="Messages" endpoint="/messages" /></ProtectedModuleRoute> },
-                { path: 'notifications', element: <ProtectedModuleRoute><BackendModulePage title="Notifications" endpoint="/notifications" /></ProtectedModuleRoute> },
             ],
         },
         {

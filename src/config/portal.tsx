@@ -20,11 +20,16 @@ export interface ClientMenuItem {
     icon: ReactNode;
 }
 
-const normalizeRole = (value: any = '') => {
+const normalizeRole = (value: unknown = '') => {
     if (typeof value === 'object' && value !== null && 'name' in value) {
-        value = value.name;
+        value = (value as { name?: unknown }).name;
     }
     return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+};
+
+export const canRegisterForCourse = (roleName?: string) => {
+    const role = normalizeRole(roleName);
+    return role === 'STUDENT' || role === 'NORMAL USER';
 };
 
 export const isBackofficeRole = (roleName?: string) => {
@@ -68,6 +73,9 @@ export const resolveTargetRoute = (roleName?: string, callback?: string | null):
         const decoded = decodeURIComponent(callback);
         const role = getPortalRole(roleName);
         const roleRoot = isBackofficeRole(roleName) ? '/admin' : `/client/${role.toLowerCase()}`;
+        if (canRegisterForCourse(roleName) && /^\/client\/courses\/[^/?#]+(?:\/checkout)?$/.test(decoded)) {
+            return decoded;
+        }
         if (decoded === roleRoot || decoded.startsWith(`${roleRoot}/`)) {
             return decoded;
         }
@@ -83,7 +91,6 @@ export const clientMenu: ClientMenuItem[] = [
     { key: '/client/student/classes', label: 'Lớp học', roles: ['STUDENT'], icon: <TeamOutlined /> },
     { key: '/client/student/schedule', label: 'Lịch học', roles: ['STUDENT'], icon: <CalendarOutlined /> },
     { key: '/client/student/invoices', label: 'Hóa đơn', roles: ['STUDENT'], icon: <FileTextOutlined /> },
-    { key: '/client/student/payments', label: 'Thanh toán', roles: ['STUDENT'], icon: <CreditCardOutlined /> },
     { key: '/client/student/chat', label: 'Tin nhắn trao đổi', roles: ['STUDENT'], icon: <MessageOutlined /> },
     { key: '/client/student/profile', label: 'Thông tin cá nhân', roles: ['STUDENT'], icon: <UserOutlined /> },
     { key: '/client/teacher', label: 'Dashboard', roles: ['TEACHER'], icon: <HomeOutlined /> },

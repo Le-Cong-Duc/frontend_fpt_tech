@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
-import { Button, Card, Col, DatePicker, Form, Input, InputNumber, Modal, Row, Select, Space, Table, message } from 'antd';
-import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined, LinkOutlined } from '@ant-design/icons';
+import { Button, Card, Col, DatePicker, Form, Input, InputNumber, Modal, Popconfirm, Row, Select, Space, Table, message } from 'antd';
+import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined, LinkOutlined, StopOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { callCreateClassroom, callDeleteClassroom, callUpdateClassroom } from '@/config/api';
@@ -108,6 +108,22 @@ const ManagerClasses = () => {
         }
     };
 
+    const closeClass = async (item: IClassroomWithDetails) => {
+        if (!item._id) return;
+        try {
+            const response = await callUpdateClassroom({ status: 'CANCELLED' }, item._id);
+            if (response?.data) {
+                message.success('Đã đóng lớp học.');
+                await data.refresh();
+                setSelected(current => current?._id === item._id ? { ...current, status: 'CANCELLED' } : current);
+            } else {
+                message.error(response?.message || 'Không thể đóng lớp học.');
+            }
+        } catch {
+            message.error('Không thể đóng lớp học. Vui lòng thử lại.');
+        }
+    };
+
     return (
         <main className={`${styles.container} ${styles['manager-page']}`}>
             <section className={styles['manager-heading']}>
@@ -159,6 +175,7 @@ const ManagerClasses = () => {
                                 style={{ minWidth: 140 }}
                                 options={[
                                     { label: 'Đang mở (OPEN)', value: 'OPEN' },
+                                    { label: 'Đã đầy (FULL)', value: 'FULL' },
                                     { label: 'Đang hoạt động (ACTIVE)', value: 'ACTIVE' },
                                     { label: 'Hoàn thành (COMPLETED)', value: 'COMPLETED' },
                                     { label: 'Đã hủy (CANCELLED)', value: 'CANCELLED' },
@@ -226,7 +243,7 @@ const ManagerClasses = () => {
                                 {
                                     title: 'Thao tác',
                                     fixed: 'right',
-                                    width: 140,
+                                    width: 210,
                                     render: (_: unknown, item) => (
                                         <Space>
                                             <Button
@@ -241,6 +258,22 @@ const ManagerClasses = () => {
                                                 title="Chỉnh sửa"
                                                 onClick={() => openForm(item)}
                                             />
+                                            {!['CANCELLED', 'COMPLETED'].includes(item.status || '') && (
+                                                <Popconfirm
+                                                    title={`Đóng lớp "${item.class_name || ''}"?`}
+                                                    description="Học viên sẽ không thể đăng ký lớp này nữa."
+                                                    okText="Đóng lớp"
+                                                    cancelText="Hủy"
+                                                    onConfirm={() => void closeClass(item)}
+                                                >
+                                                    <Button
+                                                        size="small"
+                                                        danger
+                                                        icon={<StopOutlined />}
+                                                        title="Đóng lớp"
+                                                    />
+                                                </Popconfirm>
+                                            )}
                                             <Button
                                                 size="small"
                                                 danger
@@ -358,6 +391,7 @@ const ManagerClasses = () => {
                         <Select
                             options={[
                                 { label: 'Đang mở tuyển sinh (OPEN)', value: 'OPEN' },
+                                { label: 'Đã đầy (FULL)', value: 'FULL' },
                                 { label: 'Đang học (ACTIVE)', value: 'ACTIVE' },
                                 { label: 'Đã hoàn thành (COMPLETED)', value: 'COMPLETED' },
                                 { label: 'Đã hủy (CANCELLED)', value: 'CANCELLED' },

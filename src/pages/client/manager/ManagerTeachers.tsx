@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
-import { Card, Descriptions, Input, Modal, Space, Table, Tag } from 'antd';
+import { Button, Card, Descriptions, Input, Modal, Popconfirm, Select, Space, Table, Tag, message } from 'antd';
 import { BookOutlined, CalendarOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { callUpdateClassroom } from '@/config/api';
 import { ManagerEmpty, ManagerState, enrollmentsForClass, statusTag, teachersOf, useManagerData } from './manager.shared';
 import styles from '@/styles/client.module.scss';
 
@@ -10,6 +11,8 @@ const ManagerTeachers = () => {
     const data = useManagerData();
     const [search, setSearch] = useState('');
     const [selected, setSelected] = useState<(typeof data.users)[number] | null>(null);
+    const [assignClassId, setAssignClassId] = useState<string>();
+    const [savingAssignment, setSavingAssignment] = useState(false);
 
     const teachers = useMemo(
         () =>
@@ -28,6 +31,50 @@ const ManagerTeachers = () => {
             return teacherId === selected._id;
         });
     }, [selected, data.classrooms]);
+
+    const unassignedClasses = useMemo(
+        () => data.classrooms.filter(room => {
+            const hasTeacher = typeof room.teacher_id === 'object'
+                ? Boolean(room.teacher_id?._id)
+                : Boolean(room.teacher_id);
+            return !hasTeacher && room.status !== 'CANCELLED';
+        }),
+        [data.classrooms]
+    );
+
+    const assignClass = async () => {
+        if (!selected?._id || !assignClassId) return;
+        setSavingAssignment(true);
+        try {
+            const response = await callUpdateClassroom({ teacher_id: selected._id }, assignClassId);
+            if (!response?.data) {
+                message.error(response?.message || 'Không thể phân công lớp.');
+                return;
+            }
+            message.success('Đã phân công lớp cho giảng viên.');
+            setAssignClassId(undefined);
+            await data.refresh();
+        } catch {
+            message.error('Không thể phân công lớp. Vui lòng thử lại.');
+        } finally {
+            setSavingAssignment(false);
+        }
+    };
+
+    const removeAssignment = async (classId?: string) => {
+        if (!classId) return;
+        try {
+            const response = await callUpdateClassroom({ teacher_id: null }, classId);
+            if (!response?.data) {
+                message.error(response?.message || 'Không thể gỡ giảng viên khỏi lớp.');
+                return;
+            }
+            message.success('Đã gỡ giảng viên khỏi lớp.');
+            await data.refresh();
+        } catch {
+            message.error('Không thể gỡ giảng viên khỏi lớp. Vui lòng thử lại.');
+        }
+    };
 
     return (
         <main className={`${styles.container} ${styles['manager-page']}`}>
@@ -168,9 +215,49 @@ const ManagerTeachers = () => {
                                                 `${enrollmentsForClass(room._id || '', data.enrollments).length}/${room.max_student || '—'}`,
                                         },
                                         { title: 'Trạng thái', dataIndex: 'status', render: statusTag },
+                                        {
+                                            title: 'Thao tác',
+                                            render: (_: unknown, room) => (
+                                                <Popconfirm
+                                                    title="Gỡ giảng viên khỏi lớp này?"
+                                                    description="Lớp sẽ trở về trạng thái chưa được phân công giảng viên."
+                                                    okText="Gỡ phân công"
+                                                    cancelText="Hủy"
+                                                    onConfirm={() => void removeAssignment(room._id)}
+                                                >
+                                                    <Button size="small" danger>Gỡ phân công</Button>
+                                                </Popconfirm>
+                                            ),
+                                        },
                                     ]}
                                 />
                             )}
+                        </div>
+                        <div>
+                            <h4 style={{ marginBottom: 10 }}>Phân công lớp chưa có giảng viên</h4>
+                            <Space.Compact style={{ width: '100%' }}>
+                                <Select
+                                    showSearch
+                                    optionFilterProp="label"
+                                    placeholder="Chọn lớp chưa có giảng viên"
+                                    value={assignClassId}
+                                    onChange={setAssignClassId}
+                                    options={unassignedClasses.map(room => ({
+                                        value: room._id || '',
+                                        label: `${room.class_name || 'Lớp học'} · ${room.course_id?.name || 'Chưa gán khóa học'}`,
+                                    }))}
+                                    style={{ flex: 1 }}
+                                    notFoundContent="Không còn lớp chưa phân công"
+                                />
+                                <Button
+                                    type="primary"
+                                    disabled={!assignClassId}
+                                    loading={savingAssignment}
+                                    onClick={() => void assignClass()}
+                                >
+                                    Phân công lớp
+                                </Button>
+                            </Space.Compact>
                         </div>
                     </Space>
                 )}

@@ -101,11 +101,8 @@ export const accountSlide = createSlice({
     },
     extraReducers: (builder) => {
         // Add reducers for additional action types here, and handle loading state as needed
-        builder.addCase(fetchAccount.pending, (state, action) => {
-            if (action.payload) {
-                state.isAuthenticated = false;
-                state.isLoading = true;
-            }
+        builder.addCase(fetchAccount.pending, (state) => {
+            state.isLoading = true;
         })
 
         builder.addCase(fetchAccount.fulfilled, (state, action) => {
@@ -120,14 +117,15 @@ export const accountSlide = createSlice({
                 if (action?.payload?.user?._id) {
                     localStorage.setItem('user_id', action.payload.user._id);
                 }
-            }
-        })
-
-        builder.addCase(fetchAccount.rejected, (state, action) => {
-            if (action.payload) {
+            } else {
                 state.isAuthenticated = false;
                 state.isLoading = false;
             }
+        })
+
+        builder.addCase(fetchAccount.rejected, (state) => {
+            state.isAuthenticated = false;
+            state.isLoading = false;
         })
 
     },

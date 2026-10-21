@@ -3,7 +3,7 @@ import { Alert, Avatar, Card, Col, Empty, Row, Spin, Tag } from 'antd';
 import { BookOutlined, CalendarOutlined, CheckCircleOutlined, CreditCardOutlined, FileTextOutlined, MessageOutlined, RiseOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
 import { useAppSelector } from '@/redux/hooks';
 import { getClientProfilePath, getPortalRole, type PortalRole } from '@/config/portal';
-import { callFetchClassroom, callFetchCourse, callFetchInvoice, callFetchMyEnrollments, callFetchMyInvoices, callFetchMyPayments, callFetchMyStudents, callFetchMyTeachingClassrooms, callFetchMyAssignedLeads, callFetchPayment, callFetchUser } from '@/config/api';
+import { callFetchClassroom, callFetchCourse, callFetchInvoice, callFetchMyEnrollments, callFetchMyInvoices, callFetchMyPayments, callFetchMyStudents, callFetchMyTeachingClassrooms, callFetchLeadsForConsultants, callFetchPayment, callFetchUser } from '@/config/api';
 import type { IClassroomWithDetails, ICourse, IInvoice, ILead, IPortalEnrollment, IPortalInvoice, IPortalPayment, IPayment, IUser } from '@/types/backend';
 import styles from '@/styles/client.module.scss';
 import StatCard from './components/StatCard';
@@ -44,7 +44,7 @@ const ClientDashboard = () => {
                     const [classes, students] = await Promise.all([callFetchMyTeachingClassrooms(), callFetchMyStudents()]);
                     next = { ...emptyData, classes: toArray<IClassroomWithDetails>(classes), students: toArray<IPortalEnrollment>(students) };
                 } else if (role === 'CONSULTANT') {
-                    const [leads, courses] = await Promise.all([callFetchMyAssignedLeads(), callFetchCourse('current=1&pageSize=1000')]);
+                    const [leads, courses] = await Promise.all([callFetchLeadsForConsultants(), callFetchCourse('current=1&pageSize=1000')]);
                     next = { ...emptyData, leads: toArray<ILead>(leads), courses: toArray<ICourse>(courses) };
                 } else if (role === 'ACCOUNTANT') {
                     const [invoices, payments] = await Promise.all([callFetchInvoice('current=1&pageSize=1000'), callFetchPayment('current=1&pageSize=1000')]);

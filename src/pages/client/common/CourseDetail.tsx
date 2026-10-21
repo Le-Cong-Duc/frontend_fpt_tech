@@ -1,17 +1,34 @@
 import { useEffect, useState } from 'react';
-import { Alert, Button, Empty, Spin } from 'antd';
+import { Alert, Button, Empty, message, Spin } from 'antd';
 import { ArrowLeftOutlined, BookOutlined, CreditCardOutlined } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 import { callFetchCourseById } from '@/config/api';
+import { useAppSelector } from '@/redux/hooks';
+import { canRegisterForCourse } from '@/config/portal';
 import type { ICourse } from '@/types/backend';
 import styles from '@/styles/client.module.scss';
 
 const CourseDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { isAuthenticated, isLoading: accountLoading, user } = useAppSelector(state => state.account);
     const [course, setCourse] = useState<ICourse>();
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+
+    const handleRegistration = () => {
+        if (accountLoading) return;
+        if (!isAuthenticated) {
+            message.warning('Bạn cần đăng nhập để tiếp tục. Tài khoản học viên hoặc NORMAL USER mới được đăng ký khóa học.');
+            navigate(`/login?callback=${encodeURIComponent(`/client/courses/${id}/checkout`)}`);
+            return;
+        }
+        if (!canRegisterForCourse(user.role?.name)) {
+            message.error('Vai trò tài khoản hiện tại không được phép đăng ký khóa học.');
+            return;
+        }
+        navigate(`/client/courses/${id}/checkout`);
+    };
 
     useEffect(() => {
         let active = true;
@@ -82,12 +99,12 @@ const CourseDetail = () => {
                 <h2>Quy trình đăng ký</h2>
                 <ol className={styles['detail-registration-steps']}>
                     <li>Kiểm tra thông tin và học phí của khóa học.</li>
-                    <li>Chọn “Thanh toán” để đến trang xác nhận học phí.</li>
-                    <li>Quét mã QR khi hệ thống thanh toán được kích hoạt.</li>
+                    <li>Chọn “Đăng ký khóa học” và chọn một lớp đang tuyển sinh.</li>
+                    <li>Hệ thống tạo đăng ký và hóa đơn học phí để bạn theo dõi trong mục Hóa đơn.</li>
                 </ol>
                 <div className={styles['detail-actions']}>
-                    <Button type="primary" size="large" icon={<CreditCardOutlined />} onClick={() => navigate(`/client/courses/${id}/checkout`)}>
-                        Thanh toán
+                    <Button type="primary" size="large" icon={<CreditCardOutlined />} disabled={accountLoading} onClick={handleRegistration}>
+                        Đăng ký khóa học
                     </Button>
                 </div>
             </section>

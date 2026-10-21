@@ -67,7 +67,7 @@ const ConsultantDashboard = () => {
                         Hôm nay là {dayjs().format('dddd, DD/MM/YYYY')}. Quản lý phễu tuyển sinh, chăm sóc khách hàng và chốt ghi danh học viên.
                     </p>
                 </div>
-                <Space wrap>
+                <Space className={styles['consultant-welcome-actions']}>
                     <Button
                         type="primary"
                         icon={<UserAddOutlined />}

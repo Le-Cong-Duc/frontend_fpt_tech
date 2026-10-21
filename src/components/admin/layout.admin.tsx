@@ -11,7 +11,6 @@ import {
     TeamOutlined,
     DollarOutlined,
     SolutionOutlined,
-    MessageOutlined,
 } from '@ant-design/icons';
 import { Layout, Menu, Dropdown, Space, message, Avatar, Button } from 'antd';
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -66,7 +65,7 @@ const LayoutAdmin = () => {
                     key: '/admin/permissions',
                     icon: <ApiOutlined />
                 }] : []),
-                ...(['COURSES', 'CLASSROOMS', 'ENROLLMENTS', 'INVOICES', 'PAYMENTS', 'LEADS', 'CONVERSATIONS', 'MESSAGES', 'NOTIFICATIONS'] as const)
+                ...(['COURSES', 'CLASSROOMS', 'ENROLLMENTS', 'INVOICES', 'PAYMENTS', 'LEADS'] as const)
                     .filter(resource => canView(resource))
                     .map(resource => ({
                         label: <Link to={`/admin/${resource.toLowerCase()}`}>{resource.charAt(0) + resource.slice(1).toLowerCase()}</Link>,
@@ -74,8 +73,7 @@ const LayoutAdmin = () => {
                         icon: resource === 'COURSES' ? <BookOutlined />
                             : resource === 'LEADS' ? <SolutionOutlined />
                                 : resource === 'PAYMENTS' || resource === 'INVOICES' ? <DollarOutlined />
-                                    : resource === 'CONVERSATIONS' || resource === 'MESSAGES' || resource === 'NOTIFICATIONS' ? <MessageOutlined />
-                                        : <TeamOutlined />,
+                                    : <TeamOutlined />,
                     })),
 
             ];

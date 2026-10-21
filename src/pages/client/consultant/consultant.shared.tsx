@@ -16,7 +16,7 @@ import {
     callFetchClassroom,
     callFetchCourse,
     callFetchEnrollment,
-    callFetchMyAssignedLeads,
+    callFetchLeadsForConsultants,
     callFetchRole,
     callFetchUser,
     callUpdateLead,
@@ -137,7 +137,7 @@ export const useConsultantData = () => {
                 userResponse,
                 roleResponse,
             ] = await Promise.all([
-                callFetchMyAssignedLeads(),
+                callFetchLeadsForConsultants(),
                 callFetchCourse('current=1&pageSize=1000'),
                 callFetchClassroom('current=1&pageSize=1000&populate=course_id,teacher_id'),
                 callFetchEnrollment('current=1&pageSize=1000&populate=student_id,class_id'),

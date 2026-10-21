@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { BellOutlined, MessageOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
+import { MessageOutlined, PlusOutlined, ReloadOutlined } from '@ant-design/icons';
 import { Spin } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { callFetchClassroom, callFetchCourse, callFetchRole, callFetchUser } from '@/config/api';
@@ -104,9 +104,6 @@ const DashboardPage = () => {
                     />
                     <button className={styles.iconButton} type="button" onClick={loadDashboardData} title="Làm mới">
                         <ReloadOutlined />
-                    </button>
-                    <button className={styles.iconButton} type="button" aria-label="Thông báo">
-                        <BellOutlined />
                     </button>
                     <button className={styles.iconButton} type="button" aria-label="Tin nhắn">
                         <MessageOutlined />

@@ -11,9 +11,11 @@ import {
 } from '@ant-design/icons';
 import { FaFacebookF, FaLinkedinIn, FaTiktok, FaYoutube } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import { useLeadConsultation } from './LeadConsultationProvider';
 import styles from '@/styles/client.module.scss';
 
 const Footer = () => {
+    const { openLeadForm } = useLeadConsultation();
     const scrollTo = (id: string) => {
         const el = document.getElementById(id);
         if (el) el.scrollIntoView({ behavior: 'smooth' });
@@ -78,7 +80,7 @@ const Footer = () => {
                                 </a>
                             </li>
                             <li>
-                                <a href="#lead-form" onClick={(e) => { e.preventDefault(); scrollTo('lead-form'); }}>
+                                <a href="#lead-form" onClick={(e) => { e.preventDefault(); openLeadForm(); }}>
                                     <RightOutlined style={{ fontSize: 10 }} /> Tiếng Anh Doanh Nghiệp Theo Yêu Cầu
                                 </a>
                             </li>

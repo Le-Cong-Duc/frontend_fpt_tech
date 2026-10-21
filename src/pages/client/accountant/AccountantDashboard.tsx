@@ -104,7 +104,7 @@ const AccountantDashboard = () => {
                         Hôm nay là {dayjs().format('dddd, DD/MM/YYYY')}. Theo dõi doanh thu, công nợ học phí và dòng tiền thực tế của toàn hệ thống.
                     </p>
                 </div>
-                <Space wrap className={styles['accountant-header-actions']}>
+                <Space className={styles['accountant-header-actions']}>
                     <Button
                         type="primary"
                         icon={<DollarCircleOutlined />}

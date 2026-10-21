@@ -1,46 +1,37 @@
 import { useMemo, useState } from 'react';
 import {
-    Alert,
     Button,
     Card,
     Col,
     Descriptions,
-    Divider,
     Input,
     Modal,
-    Radio,
     Row,
     Select,
     Space,
     Table,
-    Tag,
-    message,
 } from 'antd';
 import {
-    BankOutlined,
     CheckCircleOutlined,
     CreditCardOutlined,
-    DollarOutlined,
     EyeOutlined,
     FileTextOutlined,
-    QrcodeOutlined,
     SearchOutlined,
 } from '@ant-design/icons';
 import { useAppSelector } from '@/redux/hooks';
-import { callCreatePayment, callUpdateInvoice } from '@/config/api';
 import {
     StudentEmpty,
     StudentState,
     dateText,
     invoiceCourse,
     money,
-    saveLocalPayment,
     statusTag,
     updateLocalInvoice,
     useStudentData,
 } from './student.shared';
 import type { IPortalInvoice } from '@/types/backend';
 import styles from '@/styles/client.module.scss';
+import PaymentRequestModal from '@/components/client/PaymentRequestModal';
 
 const StudentInvoices = () => {
     const user = useAppSelector(state => state.account.user);
@@ -50,11 +41,8 @@ const StudentInvoices = () => {
     const [statusFilter, setStatusFilter] = useState<string>();
     const [selected, setSelected] = useState<IPortalInvoice | null>(null);
 
-    // Modal Thanh toán
     const [paymentModalOpen, setPaymentModalOpen] = useState(false);
     const [payingInvoice, setPayingInvoice] = useState<IPortalInvoice | null>(null);
-    const [paymentMethod, setPaymentMethod] = useState<'BANK_TRANSFER' | 'CASH'>('BANK_TRANSFER');
-    const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
 
     const invoices = useMemo(() => {
         return data.invoices.filter(item => {
@@ -84,54 +72,7 @@ const StudentInvoices = () => {
     // Mở modal thanh toán
     const handleOpenPayment = (invoice: IPortalInvoice) => {
         setPayingInvoice(invoice);
-        setPaymentMethod('BANK_TRANSFER');
         setPaymentModalOpen(true);
-    };
-
-    // Xác nhận thanh toán
-    const handleConfirmPayment = async () => {
-        if (!payingInvoice?._id) return;
-        setIsSubmittingPayment(true);
-        try {
-            const paymentId = `pay_${Date.now()}`;
-            // 1. Tạo giao dịch payment trên backend
-            try {
-                await callCreatePayment({
-                    invoice_id: payingInvoice._id as any,
-                    payment_method: paymentMethod,
-                    payment_date: new Date().toISOString() as any,
-                });
-            } catch {
-                // Tiếp tục đồng bộ local
-            }
-
-            // 2. Cập nhật trạng thái hóa đơn sang PAID trên backend
-            try {
-                await callUpdateInvoice({ status: 'PAID' }, payingInvoice._id);
-            } catch {
-                // Tiếp tục đồng bộ local
-            }
-
-            // 3. Đồng bộ local cache ngay tức thì
-            saveLocalPayment(user._id, {
-                _id: paymentId,
-                invoice_id: { ...payingInvoice, status: 'PAID' },
-                payment_method: paymentMethod,
-                payment_date: new Date().toISOString(),
-                createdAt: new Date().toISOString(),
-            });
-
-            updateLocalInvoice(user._id, payingInvoice._id, { status: 'PAID' });
-
-            message.success('Thanh toán học phí thành công!');
-            setPaymentModalOpen(false);
-            setPayingInvoice(null);
-            await data.refresh();
-        } catch {
-            message.error('Có lỗi xảy ra trong quá trình thanh toán. Vui lòng thử lại.');
-        } finally {
-            setIsSubmittingPayment(false);
-        }
     };
 
     return (
@@ -191,6 +132,7 @@ const StudentInvoices = () => {
                                     { label: 'Đã thanh toán (PAID)', value: 'PAID' },
                                     { label: 'Chưa thanh toán (UNPAID)', value: 'UNPAID' },
                                     { label: 'Chờ thanh toán (WAITING_PAYMENT)', value: 'WAITING_PAYMENT' },
+                                    { label: 'Chờ xác nhận', value: 'WAITING_CONFIRMATION' },
                                     { label: 'Quá hạn (OVERDUE)', value: 'OVERDUE' },
                                 ]}
                             />
@@ -261,7 +203,9 @@ const StudentInvoices = () => {
                                     title: 'Thao tác',
                                     fixed: 'right',
                                     render: (_: unknown, item) => {
-                                        const isPaid = item.status?.toUpperCase() === 'PAID';
+                                        const status = item.status?.toUpperCase();
+                                        const isPaid = status === 'PAID';
+                                        const isPending = status === 'WAITING_CONFIRMATION';
                                         return (
                                             <Space>
                                                 <Button
@@ -271,7 +215,7 @@ const StudentInvoices = () => {
                                                 >
                                                     Chi tiết
                                                 </Button>
-                                                {!isPaid && (
+                                                {!isPaid && !isPending && (
                                                     <Button
                                                         size="small"
                                                         type="primary"
@@ -296,7 +240,7 @@ const StudentInvoices = () => {
                 title="Chi tiết hóa đơn học phí"
                 open={Boolean(selected)}
                 footer={
-                    selected?.status?.toUpperCase() !== 'PAID' ? (
+                    !['PAID', 'WAITING_CONFIRMATION'].includes(selected?.status?.toUpperCase() || '') ? (
                         <Space>
                             <Button onClick={() => setSelected(null)}>Đóng</Button>
                             <Button
@@ -348,109 +292,20 @@ const StudentInvoices = () => {
             </Modal>
 
             {/* Modal Thanh toán học phí trực tuyến */}
-            <Modal
-                title={
-                    <Space>
-                        <CreditCardOutlined style={{ color: '#1677ff' }} />
-                        <span>Thanh toán học phí</span>
-                    </Space>
-                }
-                open={paymentModalOpen}
-                confirmLoading={isSubmittingPayment}
-                okText="Xác nhận đã thanh toán"
-                cancelText="Hủy"
-                onOk={handleConfirmPayment}
-                onCancel={() => setPaymentModalOpen(false)}
-                width={620}
-            >
-                {payingInvoice && (
-                    <div>
-                        <div
-                            style={{
-                                background: '#f5f7fa',
-                                padding: 14,
-                                borderRadius: 8,
-                                marginBottom: 16,
-                                textAlign: 'center',
-                            }}
-                        >
-                            <span style={{ color: '#666' }}>Số tiền cần thanh toán</span>
-                            <h2 style={{ color: '#d4380d', margin: '4px 0 0' }}>
-                                {money(payingInvoice.final_amount || payingInvoice.amount)}
-                            </h2>
-                            <p style={{ margin: '4px 0 0', color: '#555', fontSize: 13 }}>
-                                Khóa học: <b>{invoiceCourse(payingInvoice)}</b> ({payingInvoice.enrollment_id?.class_id?.class_name || 'Lớp học'})
-                            </p>
-                        </div>
-
-                        <div style={{ marginBottom: 16 }}>
-                            <b>Chọn phương thức thanh toán:</b>
-                            <Radio.Group
-                                value={paymentMethod}
-                                onChange={e => setPaymentMethod(e.target.value)}
-                                style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 10 }}
-                            >
-                                <Radio.Button value="BANK_TRANSFER" style={{ height: 'auto', padding: '10px 14px' }}>
-                                    <Space align="start">
-                                        <BankOutlined style={{ fontSize: 20, color: '#1677ff', marginTop: 2 }} />
-                                        <div>
-                                            <b>Chuyển khoản Ngân hàng (Khuyên dùng)</b>
-                                            <div style={{ fontSize: 12, color: '#888' }}>
-                                                Quét mã QR hoặc chuyển khoản nhanh 24/7
-                                            </div>
-                                        </div>
-                                    </Space>
-                                </Radio.Button>
-
-                                <Radio.Button value="CASH" style={{ height: 'auto', padding: '10px 14px' }}>
-                                    <Space align="start">
-                                        <DollarOutlined style={{ fontSize: 20, color: '#52c41a', marginTop: 2 }} />
-                                        <div>
-                                            <b>Tiền mặt tại trung tâm</b>
-                                            <div style={{ fontSize: 12, color: '#888' }}>
-                                                Nộp trực tiếp tại phòng kế toán trung tâm FPT
-                                            </div>
-                                        </div>
-                                    </Space>
-                                </Radio.Button>
-                            </Radio.Group>
-                        </div>
-
-                        {paymentMethod === 'BANK_TRANSFER' ? (
-                            <Card size="small" style={{ background: '#fafafa', borderColor: '#d9d9d9' }}>
-                                <Descriptions column={1} size="small" bordered>
-                                    <Descriptions.Item label="Ngân hàng">
-                                        <b>TPBank (Ngân hàng Tiên Phong)</b>
-                                    </Descriptions.Item>
-                                    <Descriptions.Item label="Số tài khoản">
-                                        <b style={{ fontSize: 16, color: '#1677ff' }}>0987 654 321</b>
-                                    </Descriptions.Item>
-                                    <Descriptions.Item label="Chủ tài khoản">
-                                        <b>TRUNG TAM DAO TAO FPT EDUCATION</b>
-                                    </Descriptions.Item>
-                                    <Descriptions.Item label="Số tiền">
-                                        <b style={{ color: '#d4380d' }}>
-                                            {money(payingInvoice.final_amount || payingInvoice.amount)}
-                                        </b>
-                                    </Descriptions.Item>
-                                    <Descriptions.Item label="Nội dung chuyển khoản">
-                                        <Tag color="orange" style={{ fontSize: 13, padding: '2px 8px' }}>
-                                            HOCPHI {payingInvoice._id?.slice(-8).toUpperCase()} {user.name}
-                                        </Tag>
-                                    </Descriptions.Item>
-                                </Descriptions>
-                            </Card>
-                        ) : (
-                            <Alert
-                                type="info"
-                                showIcon
-                                message="Thanh toán tiền mặt"
-                                description="Vui lòng đến trực tiếp Phòng Kế toán - Tòa nhà FPT Education, Số 1 Đường D1, Khu Công nghệ cao, TP. Thủ Đức, TP. HCM để hoàn tất nộp học phí."
-                            />
-                        )}
-                    </div>
-                )}
-            </Modal>
+            <PaymentRequestModal
+                invoice={paymentModalOpen ? payingInvoice : null}
+                userName={user.name}
+                onClose={() => {
+                    setPaymentModalOpen(false);
+                    setPayingInvoice(null);
+                }}
+                onRequested={() => {
+                    if (payingInvoice?._id) updateLocalInvoice(user._id, payingInvoice._id, { status: 'WAITING_CONFIRMATION' });
+                    setPaymentModalOpen(false);
+                    setPayingInvoice(null);
+                    void data.refresh();
+                }}
+            />
         </main>
     );
 };

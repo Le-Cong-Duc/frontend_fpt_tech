@@ -57,6 +57,8 @@ export const statusText = (value?: string) =>
         COMPLETED: 'Hoàn thành',
         CANCELLED: 'Đã hủy',
         WAITING_PAYMENT: 'Chờ thanh toán',
+        FULL: 'Đã đầy',
+        WAITING_CONFIRMATION: 'Chờ xác nhận',
         PAID: 'Đã thanh toán',
         UNPAID: 'Chưa thanh toán',
         PARTIAL: 'Thanh toán một phần',
@@ -70,7 +72,7 @@ export const statusColor = (value?: string) =>
         ? 'green'
         : ['CANCELLED', 'OVERDUE'].includes(value?.toUpperCase() || '')
           ? 'red'
-          : ['WAITING_PAYMENT', 'UNPAID'].includes(value?.toUpperCase() || '')
+          : ['WAITING_PAYMENT', 'WAITING_CONFIRMATION', 'UNPAID'].includes(value?.toUpperCase() || '')
             ? 'gold'
             : 'blue';
 
@@ -308,12 +310,9 @@ export const useStudentData = (providedUserId?: string) => {
                     };
                 })
                 .filter(inv => {
-                    if (enrichedEnrollments.length > 0) {
-                        const enrollmentId =
-                            typeof inv.enrollment_id === 'string' ? inv.enrollment_id : inv.enrollment_id?._id;
-                        return enrollmentId ? enrollmentMap.has(enrollmentId) : false;
-                    }
-                    return true;
+                    const enrollmentId =
+                        typeof inv.enrollment_id === 'string' ? inv.enrollment_id : inv.enrollment_id?._id;
+                    return enrollmentId ? enrollmentMap.has(enrollmentId) : false;
                 });
 
             // Tự động bảo đảm mỗi enrollment của học viên đều có một Invoice học phí tương ứng
@@ -386,11 +385,8 @@ export const useStudentData = (providedUserId?: string) => {
                     };
                 })
                 .filter(p => {
-                    if (enrichedInvoices.length > 0) {
-                        const invoiceId = typeof p.invoice_id === 'string' ? p.invoice_id : p.invoice_id?._id;
-                        return invoiceId ? invoiceMap.has(invoiceId) : false;
-                    }
-                    return true;
+                    const invoiceId = typeof p.invoice_id === 'string' ? p.invoice_id : p.invoice_id?._id;
+                    return invoiceId ? invoiceMap.has(invoiceId) : false;
                 });
 
             setData({

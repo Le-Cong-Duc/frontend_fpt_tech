@@ -50,7 +50,7 @@ export interface ICourse {
 export interface IClassroom {
     _id?: string;
     course_id: string;
-    teacher_id: string;
+    teacher_id: string | null;
     room?: string;
     class_name?: string;
     max_student?: string | number;
@@ -58,7 +58,7 @@ export interface IClassroom {
     end_date?: string;
     start_time?: string;
     end_time?: string;
-    status?: 'OPEN' | 'COMPLETED' | 'CANCELLED' | string;
+    status?: 'OPEN' | 'FULL' | 'COMPLETED' | 'CANCELLED' | string;
 }
 
 export interface IUserSummary {
@@ -194,4 +194,3 @@ export interface IRole {
     createdAt?: string;
     updatedAt?: string;
 }
-

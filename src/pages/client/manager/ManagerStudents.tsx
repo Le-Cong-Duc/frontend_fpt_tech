@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
-import { Card, Descriptions, Input, Modal, Space, Table, Tag } from 'antd';
-import { UserOutlined } from '@ant-design/icons';
+import { Button, Card, Descriptions, Input, Modal, Select, Space, Table, Tag, message } from 'antd';
+import { PlusOutlined, UserOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { callCreateEnrollment } from '@/config/api';
 import { ManagerEmpty, ManagerState, idOf, statusTag, studentsOf, useManagerData } from './manager.shared';
 import styles from '@/styles/client.module.scss';
 
@@ -10,6 +11,9 @@ const ManagerStudents = () => {
     const data = useManagerData();
     const [search, setSearch] = useState('');
     const [selected, setSelected] = useState<(typeof data.users)[number] | null>(null);
+    const [showClassAssignment, setShowClassAssignment] = useState(false);
+    const [selectedClassId, setSelectedClassId] = useState<string>();
+    const [savingAssignment, setSavingAssignment] = useState(false);
 
     const students = useMemo(
         () =>
@@ -25,6 +29,49 @@ const ManagerStudents = () => {
         if (!selected?._id) return [];
         return data.enrollments.filter(enrollment => idOf(enrollment.student_id) === selected._id);
     }, [selected, data.enrollments]);
+
+    const availableClasses = useMemo(() => {
+        const registeredCourseIds = new Set(
+            studentEnrollments
+                .filter(enrollment => enrollment.status?.toUpperCase() !== 'CANCELLED')
+                .map(enrollment => {
+                    const classroom = typeof enrollment.class_id === 'object'
+                        ? enrollment.class_id
+                        : data.classrooms.find(item => item._id === idOf(enrollment.class_id));
+                    return idOf(classroom?.course_id);
+                })
+                .filter(Boolean)
+        );
+        return data.classrooms.filter(classroom =>
+            classroom.status === 'OPEN' &&
+            !registeredCourseIds.has(idOf(classroom.course_id))
+        );
+    }, [data.classrooms, studentEnrollments]);
+
+    const assignStudentToClass = async () => {
+        if (!selected?._id || !selectedClassId) return;
+        setSavingAssignment(true);
+        try {
+            const response = await callCreateEnrollment({
+                student_id: selected._id,
+                class_id: selectedClassId,
+                register_date: new Date().toISOString(),
+                status: 'WAITING_PAYMENT',
+            });
+            if (!response?.data) {
+                message.error(response?.message || 'Không thể xếp lớp cho học viên.');
+                return;
+            }
+            message.success('Đã xếp lớp và tạo hóa đơn học phí cho học viên.');
+            setShowClassAssignment(false);
+            setSelectedClassId(undefined);
+            await data.refresh();
+        } catch {
+            message.error('Không thể xếp lớp cho học viên. Vui lòng thử lại.');
+        } finally {
+            setSavingAssignment(false);
+        }
+    };
 
     return (
         <main className={`${styles.container} ${styles['manager-page']}`}>
@@ -135,6 +182,40 @@ const ManagerStudents = () => {
             >
                 {selected && (
                     <Space direction="vertical" style={{ width: '100%' }} size="middle">
+                        <div>
+                            <Button
+                                type="primary"
+                                icon={<PlusOutlined />}
+                                onClick={() => setShowClassAssignment(value => !value)}
+                            >
+                                Xếp lớp
+                            </Button>
+                            {showClassAssignment && (
+                                <Space.Compact style={{ display: 'flex', width: '100%', marginTop: 10 }}>
+                                    <Select
+                                        showSearch
+                                        optionFilterProp="label"
+                                        placeholder="Chọn lớp đang mở"
+                                        value={selectedClassId}
+                                        onChange={setSelectedClassId}
+                                        options={availableClasses.map(classroom => ({
+                                            value: classroom._id || '',
+                                            label: `${classroom.class_name || 'Lớp học'} · ${classroom.course_id?.name || 'Khóa học'}${classroom.room ? ` · Phòng ${classroom.room}` : ''}`,
+                                        }))}
+                                        notFoundContent="Không có lớp đang mở phù hợp"
+                                        style={{ flex: 1 }}
+                                    />
+                                    <Button
+                                        type="primary"
+                                        disabled={!selectedClassId}
+                                        loading={savingAssignment}
+                                        onClick={() => void assignStudentToClass()}
+                                    >
+                                        Xác nhận xếp lớp
+                                    </Button>
+                                </Space.Compact>
+                            )}
+                        </div>
                         <Descriptions column={{ xs: 1, sm: 2 }} bordered size="small">
                             <Descriptions.Item label="Họ tên">
                                 <b>{selected.name}</b>

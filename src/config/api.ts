@@ -58,17 +58,35 @@ export const callUpdateMyProfile = (value: { name?: string; phone?: string; addr
     return update<IUser>('users', id, profileData);
 };
 
-export const callCreateCourse = (value: Omit<ICourse, '_id'>) => create<ICourse>('courses', value);
-export const callUpdateCourse = (value: Partial<ICourse>, id: string) => update<ICourse>('courses', id, value);
+export const callCreateCourse = (value: Omit<ICourse, '_id'>) =>
+    create<ICourse>('courses', {
+        ...value,
+        ...(value.price != null ? { price: String(value.price) } : {}),
+    });
+export const callUpdateCourse = (value: Partial<ICourse>, id: string) =>
+    update<ICourse>('courses', id, {
+        ...value,
+        ...(value.price != null ? { price: String(value.price) } : {}),
+    });
 export const callDeleteCourse = (id: string) => remove<ICourse>('courses', id);
 export const callFetchCourse = (query = '') => list<ICourse>('courses', query);
 export const callFetchCourseById = (id: string) => findById<ICourse>('courses', id);
 
-export const callCreateClassroom = (value: Omit<IClassroom, '_id'>) => create<IClassroom>('classrooms', value);
-export const callUpdateClassroom = (value: Partial<IClassroom>, id: string) => update<IClassroom>('classrooms', id, value);
+export const callCreateClassroom = (value: Omit<IClassroom, '_id'>) =>
+    create<IClassroom>('classrooms', {
+        ...value,
+        ...(value.max_student != null ? { max_student: String(value.max_student) } : {}),
+    });
+export const callUpdateClassroom = (value: Partial<IClassroom>, id: string) =>
+    update<IClassroom>('classrooms', id, {
+        ...value,
+        ...(value.max_student != null ? { max_student: String(value.max_student) } : {}),
+    });
 export const callDeleteClassroom = (id: string) => remove<IClassroom>('classrooms', id);
 export const callFetchClassroom = (query = '') => list<IClassroom>('classrooms', query);
 export const callFetchClassroomById = (id: string) => findById<IClassroom>('classrooms', id);
+export const callFetchOpenClassroomsForCourse = (courseId: string) =>
+    axios.get<IBackendRes<IClassroom[]>>(`${API_PREFIX}/classrooms/course/${courseId}/open`);
 export const callFetchMyTeachingClassrooms = async (teacherId?: string) => {
     const id = teacherId || getCurrentUserId();
     if (id) {
@@ -80,19 +98,13 @@ export const callFetchMyTeachingClassrooms = async (teacherId?: string) => {
 };
 
 export const callCreateEnrollment = (value: Omit<IEnrollment, '_id'>) => create<IEnrollment>('enrollments', value);
+export const callRegisterForCourse = (value: Omit<IEnrollment, '_id'>) => axios.post<IBackendRes<IEnrollment>>(`${API_PREFIX}/enrollments/register`, value);
 export const callUpdateEnrollment = (value: Partial<IEnrollment>, id: string) => update<IEnrollment>('enrollments', id, value);
 export const callDeleteEnrollment = (id: string) => remove<IEnrollment>('enrollments', id);
 export const callFetchEnrollment = (query = '') => list<IEnrollment>('enrollments', query);
 export const callFetchEnrollmentById = (id: string) => findById<IEnrollment>('enrollments', id);
-export const callFetchMyEnrollments = async (studentId?: string) => {
-    const id = studentId || getCurrentUserId();
-    if (id) {
-        const res = await list<IPortalEnrollment>('enrollments', `student_id=${id}&populate=class_id,student_id&pageSize=1000`);
-        const items = res?.data?.result;
-        if (Array.isArray(items) && items.length > 0) return res;
-    }
-    return list<IPortalEnrollment>('enrollments', 'populate=class_id,student_id&pageSize=1000');
-};
+export const callFetchMyEnrollments = (_studentId?: string) =>
+    axios.get<IBackendRes<IPortalEnrollment[]>>(`${API_PREFIX}/enrollments/me`);
 export const callFetchMyStudents = (classId?: string) => {
     const query = classId
         ? `class_id=${classId}&populate=student_id,class_id&pageSize=1000`
@@ -105,29 +117,24 @@ export const callUpdateInvoice = (value: Partial<IInvoice>, id: string) => updat
 export const callDeleteInvoice = (id: string) => remove<IInvoice>('invoices', id);
 export const callFetchInvoice = (query = '') => list<IInvoice>('invoices', query);
 export const callFetchInvoiceById = (id: string) => findById<IInvoice>('invoices', id);
-export const callFetchMyInvoices = () => list<IPortalInvoice>('invoices', 'populate=enrollment_id&pageSize=1000');
+export const callFetchMyInvoices = () =>
+    axios.get<IBackendRes<IPortalInvoice[]>>(`${API_PREFIX}/invoices/me`);
 
 export const callCreatePayment = (value: Omit<IPayment, '_id'>) => create<IPayment>('payments', value);
 export const callUpdatePayment = (value: Partial<IPayment>, id: string) => update<IPayment>('payments', id, value);
 export const callDeletePayment = (id: string) => remove<IPayment>('payments', id);
 export const callFetchPayment = (query = '') => list<IPayment>('payments', query);
 export const callFetchPaymentById = (id: string) => findById<IPayment>('payments', id);
-export const callFetchMyPayments = () => list<IPortalPayment>('payments', 'populate=invoice_id&pageSize=1000');
+export const callFetchMyPayments = () =>
+    axios.get<IBackendRes<IPortalPayment[]>>(`${API_PREFIX}/payments/me`);
 
 export const callCreateLead = (value: { full_name: string; phone: string; email: string; course_name: string; note?: string }) => axios.post<IBackendRes<ILead>>(`${API_PREFIX}/leads`, value);
 export const callUpdateLead = (value: Partial<ILead>, id: string) => update<ILead>('leads', id, value);
 export const callDeleteLead = (id: string) => remove<ILead>('leads', id);
 export const callFetchLead = (query = '') => list<ILead>('leads', query);
 export const callFetchLeadById = (id: string) => findById<ILead>('leads', id);
-export const callFetchMyAssignedLeads = async (consultantId?: string) => {
-    const id = consultantId || getCurrentUserId();
-    if (id) {
-        const res = await list<ILead>('leads', `consultant_id=${id}&pageSize=1000`);
-        const items = res?.data?.result;
-        if (Array.isArray(items) && items.length > 0) return res;
-    }
-    return list<ILead>('leads', 'pageSize=1000');
-};
+export const callFetchLeadsForConsultants = () =>
+    axios.get<IBackendRes<ILead[]>>(`${API_PREFIX}/leads/consultant-inbox`);
 
 export const callCreateUser = (value: Omit<IUser, '_id'>) => create<IUser>('users', value);
 export const callUpdateUser = (value: Partial<IUser>, id: string) => update<IUser>('users', id, value);

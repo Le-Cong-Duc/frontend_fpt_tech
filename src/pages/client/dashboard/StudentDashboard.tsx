@@ -10,7 +10,7 @@ import RecentActivity, { type ActivityItem } from './components/RecentActivity';
 
 const StudentDashboard = () => {
     const user = useAppSelector(state => state.account.user);
-    const { enrollments, invoices, payments, loading, error } = useStudentData('all');
+    const { enrollments, invoices, payments, loading, error } = useStudentData(user._id);
 
     const upcoming = [...enrollments]
         .filter(item => item.class_id?.start_date)

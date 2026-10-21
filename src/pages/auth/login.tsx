@@ -3,13 +3,10 @@ import { Button, Checkbox, Form, Input, message, notification } from 'antd';
 import {
     ArrowLeftOutlined,
     CheckCircleFilled,
-    CrownOutlined,
     LockOutlined,
     MailOutlined,
     RocketOutlined,
     SafetyCertificateOutlined,
-    TeamOutlined,
-    UserOutlined,
 } from '@ant-design/icons';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
@@ -19,18 +16,9 @@ import { useAppSelector } from '@/redux/hooks';
 import { resolveTargetRoute } from '@/config/portal';
 import styles from '@/styles/auth.module.scss';
 
-const DEMO_ACCOUNTS = [
-    { label: 'Admin', email: 'admin@gmail.com', icon: <CrownOutlined style={{ color: '#ea580c' }} /> },
-    { label: 'Giảng viên', email: 'teacher@gmail.com', icon: <TeamOutlined style={{ color: '#0284c7' }} /> },
-    { label: 'Học viên', email: 'student@gmail.com', icon: <UserOutlined style={{ color: '#10b981' }} /> },
-    { label: 'Tư vấn viên', email: 'consultant@gmail.com', icon: <UserOutlined style={{ color: '#8b5cf6' }} /> },
-    { label: 'Kế toán', email: 'accountant@gmail.com', icon: <UserOutlined style={{ color: '#f59e0b' }} /> },
-];
-
 const LoginPage = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const [form] = Form.useForm();
     const [isSubmit, setIsSubmit] = useState(false);
     const { isAuthenticated, user } = useAppSelector(state => state.account);
 
@@ -74,14 +62,6 @@ const LoginPage = () => {
         } finally {
             setIsSubmit(false);
         }
-    };
-
-    const handleSelectDemo = (email: string) => {
-        form.setFieldsValue({
-            username: email,
-            password: 'password', // Mật khẩu mẫu mặc định cho database seed
-        });
-        message.info(`Đã chọn tài khoản mẫu: ${email}`);
     };
 
     return (
@@ -153,7 +133,6 @@ const LoginPage = () => {
                     </div>
 
                     <Form
-                        form={form}
                         name="loginForm"
                         layout="vertical"
                         onFinish={onFinish}
@@ -215,25 +194,6 @@ const LoginPage = () => {
                             )}
                         </button>
                     </Form>
-
-                    {/* Quick Demo Accounts Selection */}
-                    <div className={styles['demo-accounts-box']}>
-                        <div className={styles['demo-title']}>
-                            <CrownOutlined style={{ color: '#f97316' }} /> Tài khoản thử nghiệm nhanh (Click để chọn):
-                        </div>
-                        <div className={styles['demo-chips']}>
-                            {DEMO_ACCOUNTS.map(acc => (
-                                <button
-                                    key={acc.email}
-                                    type="button"
-                                    className={styles['demo-chip']}
-                                    onClick={() => handleSelectDemo(acc.email)}
-                                >
-                                    {acc.icon} {acc.label}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
 
                     <div className={styles['form-footer']}>
                         Chưa có tài khoản học viên?

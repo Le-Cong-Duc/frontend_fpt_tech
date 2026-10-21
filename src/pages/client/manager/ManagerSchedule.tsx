@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Card, Input, Select, Space, Tag } from 'antd';
 import { CalendarOutlined, ClockCircleOutlined, TeamOutlined, UserOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
-import { ManagerEmpty, ManagerState, enrollmentsForClass, statusTag, teachersOf, useManagerData } from './manager.shared';
+import { ManagerEmpty, ManagerState, dateText, enrollmentsForClass, statusTag, teachersOf, useManagerData } from './manager.shared';
 import styles from '@/styles/client.module.scss';
 
 const ManagerSchedule = () => {
@@ -28,7 +28,7 @@ const ManagerSchedule = () => {
                 const matchTeacher = !teacher || teacherId === teacher;
                 const matchStatus = !status || item.status === status;
                 return matchSearch && matchRoom && matchTeacher && matchStatus;
-            }),
+            }).sort((a, b) => new Date(a.start_date || 0).getTime() - new Date(b.start_date || 0).getTime()),
         [data.classrooms, room, teacher, status, search]
     );
 
@@ -43,7 +43,7 @@ const ManagerSchedule = () => {
             </section>
 
             <ManagerState loading={data.loading} error={data.error}>
-                {!rows.length && !search && !room && !teacher ? (
+                {!rows.length && !search && !room && !teacher && !status ? (
                     <ManagerEmpty description="Chưa có thời khóa biểu nào được thiết lập" />
                 ) : (
                     <>
@@ -81,6 +81,7 @@ const ManagerSchedule = () => {
                                 style={{ minWidth: 140 }}
                                 options={[
                                     { label: 'Đang mở (OPEN)', value: 'OPEN' },
+                                    { label: 'Đã đầy (FULL)', value: 'FULL' },
                                     { label: 'Đang học (ACTIVE)', value: 'ACTIVE' },
                                     { label: 'Hoàn thành (COMPLETED)', value: 'COMPLETED' },
                                 ]}
@@ -105,6 +106,11 @@ const ManagerSchedule = () => {
                                                 <b>{item.start_time || '—'}</b>
                                                 <span>{item.end_time || '—'}</span>
                                             </div>
+                                            <div className={styles['manager-schedule-date']}>
+                                                <CalendarOutlined />
+                                                <span>{dateText(item.start_date)}</span>
+                                                {item.end_date && <small>đến {dateText(item.end_date)}</small>}
+                                            </div>
                                             <div className={styles['manager-schedule-info']}>
                                                 <h3>{item.class_name || 'Lớp học'}</h3>
                                                 <p>
@@ -118,14 +124,9 @@ const ManagerSchedule = () => {
                                                     <span>
                                                         <TeamOutlined /> Sĩ số: {studentCount}/{item.max_student || '—'}
                                                     </span>
-                                                    {item.start_date && (
-                                                        <span>
-                                                            <CalendarOutlined /> {item.start_date} ~ {item.end_date || ''}
-                                                        </span>
-                                                    )}
                                                 </Space>
                                             </div>
-                                            <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center' }}>
+                                            <div className={styles['manager-schedule-status']}>
                                                 {statusTag(item.status)}
                                             </div>
                                         </Card>

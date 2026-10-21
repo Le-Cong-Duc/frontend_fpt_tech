@@ -62,6 +62,7 @@ export const dateText = (value?: string) => (value ? new Date(value).toLocaleDat
 export const statusText = (status?: string) =>
     ({
         OPEN: 'Đang mở',
+        FULL: 'Đã đầy',
         ACTIVE: 'Đang hoạt động',
         COMPLETED: 'Hoàn thành',
         CANCELLED: 'Đã hủy',
@@ -76,6 +77,8 @@ export const statusColor = (status?: string) =>
         ? 'green'
         : ['CANCELLED', 'ABSENT'].includes(status?.toUpperCase() || '')
           ? 'red'
+          : status?.toUpperCase() === 'FULL'
+            ? 'volcano'
           : ['WAITING_PAYMENT', 'LATE', 'EXCUSED'].includes(status?.toUpperCase() || '')
             ? 'gold'
             : 'blue';

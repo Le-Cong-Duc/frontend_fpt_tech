@@ -119,6 +119,7 @@ const TeacherSchedule = () => {
                             style={{ minWidth: 160 }}
                             options={[
                                 { label: 'Đang mở (OPEN)', value: 'OPEN' },
+                                { label: 'Đã đầy (FULL)', value: 'FULL' },
                                 { label: 'Đang học (ACTIVE)', value: 'ACTIVE' },
                                 { label: 'Hoàn thành (COMPLETED)', value: 'COMPLETED' },
                                 { label: 'Đã hủy (CANCELLED)', value: 'CANCELLED' },
@@ -144,7 +145,7 @@ const TeacherSchedule = () => {
                                 <Col xs={24} md={12} key={item._id}>
                                     <Card
                                         hoverable
-                                        className={styles['portal-card']}
+                                        className={`${styles['portal-card']} ${styles['teacher-schedule-card']}`}
                                         style={{ height: '100%', borderTop: '3px solid #1677ff' }}
                                     >
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
@@ -176,19 +177,7 @@ const TeacherSchedule = () => {
                                             {statusTag(item.status)}
                                         </div>
 
-                                        <div
-                                            style={{
-                                                background: '#f8f9fa',
-                                                borderRadius: 8,
-                                                padding: '10px 14px',
-                                                marginBottom: 12,
-                                                display: 'flex',
-                                                justifyContent: 'space-between',
-                                                alignItems: 'center',
-                                                flexWrap: 'wrap',
-                                                gap: 8,
-                                            }}
-                                        >
+                                        <div className={styles['teacher-schedule-meta']}>
                                             <Space>
                                                 <ClockCircleOutlined style={{ color: '#1677ff' }} />
                                                 <b>Khung giờ:</b>
@@ -203,15 +192,15 @@ const TeacherSchedule = () => {
                                             </Space>
                                         </div>
 
-                                        <div style={{ fontSize: 13, color: '#555', marginBottom: 16 }}>
-                                            <p style={{ margin: '4px 0' }}>
-                                                <CalendarOutlined style={{ marginRight: 6 }} />
-                                                <b>Thời gian khóa:</b> {dateText(item.start_date)} ~ {dateText(item.end_date)}
-                                            </p>
-                                            <p style={{ margin: '4px 0' }}>
-                                                <TeamOutlined style={{ marginRight: 6 }} />
-                                                <b>Sĩ số hiện tại:</b> {studentsInClass.length} / {item.max_student || 30} học viên
-                                            </p>
+                                        <div className={styles['teacher-schedule-details']}>
+                                            <div>
+                                                <CalendarOutlined />
+                                                <span><b>Thời gian khóa</b>{dateText(item.start_date)} – {dateText(item.end_date)}</span>
+                                            </div>
+                                            <div>
+                                                <TeamOutlined />
+                                                <span><b>Sĩ số hiện tại</b>{studentsInClass.length} / {item.max_student || 30} học viên</span>
+                                            </div>
                                         </div>
 
                                         <Divider style={{ margin: '12px 0' }} />

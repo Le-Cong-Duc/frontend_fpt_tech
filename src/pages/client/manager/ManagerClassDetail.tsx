@@ -490,6 +490,7 @@ const ManagerClassDetail = () => {
                         <Select
                             options={[
                                 { label: 'Đang mở tuyển sinh (OPEN)', value: 'OPEN' },
+                                { label: 'Đã đầy (FULL)', value: 'FULL' },
                                 { label: 'Đang học (ACTIVE)', value: 'ACTIVE' },
                                 { label: 'Đã hoàn thành (COMPLETED)', value: 'COMPLETED' },
                                 { label: 'Đã hủy (CANCELLED)', value: 'CANCELLED' },

@@ -119,6 +119,7 @@ export const invoiceStatusText = (status?: string) => {
         case 'PAID': return 'Đã thanh toán';
         case 'PARTIAL': return 'Thanh toán một phần';
         case 'CANCELLED': return 'Đã hủy';
+        case 'WAITING_CONFIRMATION': return 'Chờ xác nhận';
         default: return 'Chưa thanh toán';
     }
 };
@@ -128,6 +129,7 @@ export const invoiceStatusColor = (status?: string) => {
         case 'PAID': return 'green';
         case 'PARTIAL': return 'blue';
         case 'CANCELLED': return 'red';
+        case 'WAITING_CONFIRMATION': return 'orange';
         default: return 'gold';
     }
 };

@@ -18,12 +18,14 @@ import { useAppDispatch, useAppSelector } from '@/redux/hooks';
 import { callLogout } from '@/config/api';
 import { setLogoutAction } from '@/redux/slice/accountSlide';
 import { getClientMenu, getDefaultRouteForRole, getPortalRole, isBackofficeRole } from '@/config/portal';
+import { useLeadConsultation } from './LeadConsultationProvider';
 import styles from '@/styles/client.module.scss';
 
 const Header = () => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const location = useLocation();
+    const { openLeadForm } = useLeadConsultation();
     const isAuthenticated = useAppSelector(state => state.account.isAuthenticated);
     const user = useAppSelector(state => state.account.user);
     const [openMobileMenu, setOpenMobileMenu] = useState(false);
@@ -184,7 +186,7 @@ const Header = () => {
                                     <button
                                         type="button"
                                         className={styles['cta-consult-btn']}
-                                        onClick={() => scrollToSection('lead-form')}
+                                        onClick={() => openLeadForm()}
                                     >
                                         <GiftOutlined /> Nhận Tư Vấn & Học Bổng
                                     </button>
@@ -254,7 +256,7 @@ const Header = () => {
                         }}
                         onClick={() => {
                             setOpenMobileMenu(false);
-                            scrollToSection('lead-form');
+                            openLeadForm();
                         }}
                     >
                         <GiftOutlined /> Đăng ký nhận học bổng 30%

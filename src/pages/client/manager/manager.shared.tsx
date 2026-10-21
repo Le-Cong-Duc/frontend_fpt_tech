@@ -40,10 +40,12 @@ export const roleName = (user: IUser) => user.role?.name?.toUpperCase() || '';
 export const statusText = (status?: string) =>
     ({
         OPEN: 'Đang mở',
+        FULL: 'Đã đầy',
         ACTIVE: 'Đang hoạt động',
         COMPLETED: 'Đã hoàn thành',
         CANCELLED: 'Đã hủy',
         CLOSED: 'Đã đóng',
+        INACTIVE: 'Đã đóng',
         STUDYING: 'Đang học',
         WAITING_PAYMENT: 'Chờ thanh toán',
     }[status?.toUpperCase() || ''] || status || 'Chưa cập nhật');
@@ -51,8 +53,10 @@ export const statusText = (status?: string) =>
 export const statusColor = (status?: string) =>
     ['OPEN', 'ACTIVE', 'STUDYING'].includes(status?.toUpperCase() || '')
         ? 'green'
-        : ['CANCELLED', 'CLOSED'].includes(status?.toUpperCase() || '')
+        : ['CANCELLED', 'CLOSED', 'INACTIVE'].includes(status?.toUpperCase() || '')
           ? 'red'
+          : status?.toUpperCase() === 'FULL'
+            ? 'volcano'
           : 'gold';
 
 export const statusTag = (status?: string) => <Tag color={statusColor(status)}>{statusText(status)}</Tag>;

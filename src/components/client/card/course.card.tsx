@@ -19,8 +19,11 @@ import {
     TrophyOutlined,
     UserOutlined,
 } from '@ant-design/icons';
-import { Collapse, Empty, Modal, Spin, message } from 'antd';
-import { callCreateLead, callFetchCourse } from '@/config/api';
+import { Collapse, Empty, Spin, message } from 'antd';
+import { callFetchCourse } from '@/config/api';
+import { canRegisterForCourse } from '@/config/portal';
+import { useAppSelector } from '@/redux/hooks';
+import { useLeadConsultation } from '../LeadConsultationProvider';
 import type { ICourse } from '@/types/backend';
 import styles from '@/styles/client.module.scss';
 
@@ -84,21 +87,26 @@ const FEATURED_COURSES: ICourse[] = [
 
 const CourseCard = () => {
     const navigate = useNavigate();
+    const { openLeadForm } = useLeadConsultation();
+    const { isAuthenticated, isLoading: accountLoading, user } = useAppSelector(state => state.account);
     const [courses, setCourses] = useState<ICourse[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [activeCategory, setActiveCategory] = useState('ALL');
 
-    // Lead Form State
-    const [leadForm, setLeadForm] = useState({
-        full_name: '',
-        phone: '',
-        email: '',
-        course_name: 'IELTS Intensive Breakthrough (Cam Kết 7.0+)',
-        note: '',
-    });
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+    const handleCoursePurchase = (courseId?: string) => {
+        if (!courseId || accountLoading) return;
+        if (!isAuthenticated) {
+            message.warning('Bạn cần đăng nhập để tiếp tục. Tài khoản học viên hoặc NORMAL USER mới được đăng ký khóa học.');
+            navigate(`/login?callback=${encodeURIComponent(`/client/courses/${courseId}/checkout`)}`);
+            return;
+        }
+        if (!canRegisterForCourse(user.role?.name)) {
+            message.error('Vai trò tài khoản hiện tại không được phép đăng ký khóa học.');
+            return;
+        }
+        navigate(`/client/courses/${courseId}`);
+    };
 
     useEffect(() => {
         const fetchCourses = async () => {
@@ -163,47 +171,6 @@ const CourseCard = () => {
         if (Number.isNaN(num) || !num) return '';
         const original = Math.round(num * 1.3);
         return `${original.toLocaleString('vi-VN')} đ`;
-    };
-
-    const handleSelectCourseForLead = (courseName: string) => {
-        setLeadForm(prev => ({ ...prev, course_name: courseName }));
-        const el = document.getElementById('lead-form');
-        if (el) el.scrollIntoView({ behavior: 'smooth' });
-    };
-
-    const handleSubmitLead = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!leadForm.full_name.trim()) {
-            message.warning('Vui lòng nhập họ và tên của bạn.');
-            return;
-        }
-        if (!leadForm.phone.trim()) {
-            message.warning('Vui lòng nhập số điện thoại để chuyên viên tư vấn liên hệ.');
-            return;
-        }
-
-        setIsSubmitting(true);
-        try {
-            await callCreateLead({
-                full_name: leadForm.full_name.trim(),
-                phone: leadForm.phone.trim(),
-                email: leadForm.email.trim() || 'hocvien@fpt.edu.vn',
-                course_name: leadForm.course_name,
-                note: leadForm.note.trim() || 'Đăng ký tư vấn lộ trình & nhận học bổng 30% tại trang chủ',
-            });
-            setIsSuccessModalOpen(true);
-            setLeadForm({
-                full_name: '',
-                phone: '',
-                email: '',
-                course_name: 'IELTS Intensive Breakthrough (Cam Kết 7.0+)',
-                note: '',
-            });
-        } catch {
-            message.error('Hệ thống đang bảo trì gửi thông tin. Vui lòng gọi trực tiếp hotline 1900 6600 để được hỗ trợ ngay!');
-        } finally {
-            setIsSubmitting(false);
-        }
     };
 
     const scrollTo = (id: string) => {
@@ -273,7 +240,7 @@ const CourseCard = () => {
                                 <button
                                     type="button"
                                     className={styles['btn-primary-hero']}
-                                    onClick={() => scrollTo('lead-form')}
+                                    onClick={() => openLeadForm()}
                                 >
                                     <GiftOutlined /> Đăng Ký Tư Vấn & Nhận Học Bổng 30%
                                 </button>
@@ -287,92 +254,22 @@ const CourseCard = () => {
                             </div>
                         </div>
 
-                        {/* Hero Right: Lead Capture Form Card */}
-                        <div className={styles['lead-form-card']} id="lead-form">
+                        <div className={styles['lead-form-card']}>
                             <div className={styles['form-header']}>
                                 <span className={styles['form-badge']}>
                                     <FireOutlined /> Ưu Đãi Giới Hạn Tháng Này
                                 </span>
                                 <h3>ĐĂNG KÝ TƯ VẤN & NHẬN HỌC BỔNG</h3>
-                                <p>Kiểm tra năng lực 4 kỹ năng 1-1 MIỄN PHÍ cùng chuyên gia học thuật</p>
+                                <p>Nhận tư vấn lộ trình phù hợp và cơ hội học bổng đến 30% từ đội ngũ tư vấn.</p>
                             </div>
-
-                            <form className={styles['form-body']} onSubmit={handleSubmitLead}>
-                                <div className={styles['input-group']}>
-                                    <label>Họ và tên học viên *</label>
-                                    <input
-                                        type="text"
-                                        placeholder="Ví dụ: Nguyễn Văn An"
-                                        value={leadForm.full_name}
-                                        onChange={e => setLeadForm({ ...leadForm, full_name: e.target.value })}
-                                        required
-                                    />
+                            <div className={styles['form-body']}>
+                                <div className={styles['form-guarantee']}>
+                                    <SafetyCertificateOutlined style={{ color: '#10b981' }} />
+                                    <span>Tư vấn viên sẽ liên hệ để trao đổi chi tiết lộ trình học.</span>
                                 </div>
-
-                                <div className={styles['input-group']}>
-                                    <label>Số điện thoại liên hệ *</label>
-                                    <input
-                                        type="tel"
-                                        placeholder="Ví dụ: 0912 345 678"
-                                        value={leadForm.phone}
-                                        onChange={e => setLeadForm({ ...leadForm, phone: e.target.value })}
-                                        required
-                                    />
-                                </div>
-
-                                <div className={styles['input-group']}>
-                                    <label>Địa chỉ Email</label>
-                                    <input
-                                        type="email"
-                                        placeholder="Ví dụ: an.nguyen@gmail.com"
-                                        value={leadForm.email}
-                                        onChange={e => setLeadForm({ ...leadForm, email: e.target.value })}
-                                    />
-                                </div>
-
-                                <div className={styles['input-group']}>
-                                    <label>Chương trình quan tâm</label>
-                                    <select
-                                        value={leadForm.course_name}
-                                        onChange={e => setLeadForm({ ...leadForm, course_name: e.target.value })}
-                                    >
-                                        <option value="IELTS Intensive Breakthrough (Cam Kết 7.0+)">Luyện thi IELTS Quốc Tế (Cam kết 7.0+)</option>
-                                        <option value="TOEIC 4 Kỹ Năng Đột Phá (Mục Tiêu 850+)">Luyện thi TOEIC 4 Kỹ Năng Cấp Tốc (850+)</option>
-                                        <option value="Tiếng Anh Giao Tiếp Phản Xạ & Thương Mại Quốc Tế">Tiếng Anh Giao Tiếp Quốc Tế & Phản Xạ</option>
-                                        <option value="Tiếng Nhật IT & Luyện Thi JLPT N3 - N2 Cấp Tốc">Tiếng Nhật IT & Luyện thi JLPT N3 - N2</option>
-                                        <option value="Tiếng Hàn Du Học & Chinh Phục TOPIK II (Level 3-4)">Tiếng Hàn Du Học & Luyện thi TOPIK II</option>
-                                        <option value="Tiếng Anh Học Thuật Cambridge (FCE / CAE)">Tiếng Anh Thiếu Niên Cambridge Học Thuật</option>
-                                    </select>
-                                </div>
-
-                                <div className={styles['input-group']}>
-                                    <label>Mục tiêu điểm số / Thời gian mong muốn</label>
-                                    <textarea
-                                        rows={2}
-                                        placeholder="Ví dụ: Muốn đạt IELTS 6.5 trong 4 tháng để đi du học..."
-                                        value={leadForm.note}
-                                        onChange={e => setLeadForm({ ...leadForm, note: e.target.value })}
-                                    />
-                                </div>
-
-                                <button
-                                    type="submit"
-                                    className={styles['submit-btn']}
-                                    disabled={isSubmitting}
-                                >
-                                    {isSubmitting ? (
-                                        <>Đang gửi thông tin...</>
-                                    ) : (
-                                        <>
-                                            <RocketOutlined /> GỬI YÊU CẦU & NHẬN HỌC BỔNG NGAY
-                                        </>
-                                    )}
+                                <button type="button" className={styles['submit-btn']} onClick={() => openLeadForm()}>
+                                    <RocketOutlined /> ĐĂNG KÝ TƯ VẤN & NHẬN HỌC BỔNG
                                 </button>
-                            </form>
-
-                            <div className={styles['form-guarantee']}>
-                                <SafetyCertificateOutlined style={{ color: '#10b981' }} />
-                                <span>FPT cam kết bảo mật 100% thông tin. Tư vấn viên liên hệ trong 15 phút.</span>
                             </div>
                         </div>
                     </div>
@@ -585,14 +482,15 @@ const CourseCard = () => {
                                                 <button
                                                     type="button"
                                                     className={styles['btn-details']}
-                                                    onClick={() => course._id && navigate(`/client/courses/${course._id}`)}
+                                                    disabled={accountLoading}
+                                                    onClick={() => handleCoursePurchase(course._id)}
                                                 >
                                                     Mua ngay
                                                 </button>
                                                 <button
                                                     type="button"
                                                     className={styles['btn-register-fast']}
-                                                    onClick={() => handleSelectCourseForLead(course.name)}
+                                                    onClick={() => openLeadForm(course.name)}
                                                 >
                                                     Tư vấn ngay
                                                 </button>
@@ -901,7 +799,7 @@ const CourseCard = () => {
                             <button
                                 type="button"
                                 className={styles['btn-cta-primary']}
-                                onClick={() => scrollTo('lead-form')}
+                                onClick={() => openLeadForm()}
                             >
                                 <RocketOutlined /> ĐĂNG KÝ NHẬN HỌC BỔNG NGAY
                             </button>
@@ -913,56 +811,6 @@ const CourseCard = () => {
                 </div>
             </section>
 
-            {/* Success Modal Confirmation */}
-            <Modal
-                open={isSuccessModalOpen}
-                onOk={() => setIsSuccessModalOpen(false)}
-                onCancel={() => setIsSuccessModalOpen(false)}
-                footer={null}
-                centered
-            >
-                <div style={{ textAlign: 'center', padding: '24px 10px' }}>
-                    <div
-                        style={{
-                            width: 68,
-                            height: 68,
-                            borderRadius: '50%',
-                            background: '#ecfdf5',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            margin: '0 auto 16px',
-                            color: '#10b981',
-                            fontSize: 34,
-                        }}
-                    >
-                        <CheckCircleFilled />
-                    </div>
-                    <h3 style={{ fontSize: 22, fontWeight: 800, color: '#0f172a', margin: '0 0 10px' }}>
-                        ĐĂNG KÝ THÀNH CÔNG!
-                    </h3>
-                    <p style={{ fontSize: 14.5, color: '#475569', lineHeight: 1.6, margin: '0 0 20px' }}>
-                        Cảm ơn bạn đã tin tưởng <strong>FPT Language Center</strong>. Thông tin của bạn đã được chuyển đến
-                        Bộ phận Học vụ & Tuyển sinh. Chuyên viên sẽ liên hệ với bạn trong vòng <strong>15 phút</strong> để
-                        xếp lịch thi thử 1-1 và gửi tặng voucher học bổng 30%.
-                    </p>
-                    <button
-                        type="button"
-                        style={{
-                            padding: '10px 28px',
-                            background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
-                            border: 'none',
-                            borderRadius: '999px',
-                            color: '#ffffff',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                        }}
-                        onClick={() => setIsSuccessModalOpen(false)}
-                    >
-                        Xác Nhận & Đóng
-                    </button>
-                </div>
-            </Modal>
         </div>
     );
 };
