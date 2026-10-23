@@ -360,6 +360,7 @@ const AccountantInvoices = () => {
                                 { label: 'Đã thanh toán (PAID)', value: 'PAID' },
                                 { label: 'Chưa thanh toán (UNPAID)', value: 'UNPAID' },
                                 { label: 'Thanh toán một phần', value: 'PARTIAL' },
+                                { label: 'Chờ xác nhận', value: 'WAITING_CONFIRMATION' },
                                 { label: 'Đã hủy (CANCELLED)', value: 'CANCELLED' },
                             ]}
                         />

@@ -10,10 +10,11 @@ interface PaymentRequestModalProps {
     invoice: IPortalInvoice | null;
     userName?: string;
     onClose: () => void;
+    onPayLater?: () => void;
     onRequested: () => void;
 }
 
-const PaymentRequestModal = ({ invoice, userName, onClose, onRequested }: PaymentRequestModalProps) => {
+const PaymentRequestModal = ({ invoice, userName, onClose, onPayLater, onRequested }: PaymentRequestModalProps) => {
     const [paymentMethod, setPaymentMethod] = useState<'BANK_TRANSFER' | 'CASH'>('BANK_TRANSFER');
     const [submitting, setSubmitting] = useState(false);
 
@@ -57,9 +58,9 @@ const PaymentRequestModal = ({ invoice, userName, onClose, onRequested }: Paymen
             open={Boolean(invoice)}
             onCancel={onClose}
             footer={[
-                <Button key="cancel" onClick={onClose}>Đóng</Button>,
+                <Button key="later" onClick={onPayLater || onClose}>Thanh toán sau</Button>,
                 <Button key="submit" type="primary" loading={submitting} onClick={handleRequest}>
-                    Gửi yêu cầu thanh toán
+                    Thanh toán ngay
                 </Button>,
             ]}
             width={640}

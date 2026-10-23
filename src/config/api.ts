@@ -46,11 +46,16 @@ const getCurrentUserId = () => {
     return '';
 };
 
-export const callRegister = (name: string, email: string, password: string, age: number, gender: string, address: string) => axios.post<IBackendRes<IUser>>(`${API_PREFIX}/auth/register`, { name, email, password, age, gender, address });
-export const callLogin = (username: string, password: string) => axios.post<IBackendRes<IAccount>>(`${API_PREFIX}/auth/login`, { username, password });
-export const callFetchAccount = () => axios.get<IBackendRes<IGetAccount>>(`${API_PREFIX}/auth/account`);
-export const callRefreshToken = () => axios.get<IBackendRes<IAccount>>(`${API_PREFIX}/auth/refresh`);
-export const callLogout = () => axios.post<IBackendRes<string>>(`${API_PREFIX}/auth/logout`);
+export const callRegister = (name: string, email: string, password: string, age: number, gender: string, address: string) =>
+    axios.post<IBackendRes<IUser>>(`${API_PREFIX}/auth/register`, { name, email, password, age, gender, address });
+export const callLogin = (username: string, password: string) =>
+    axios.post<IBackendRes<IAccount>>(`${API_PREFIX}/auth/login`, { username, password });
+export const callFetchAccount = () =>
+    axios.get<IBackendRes<IGetAccount>>(`${API_PREFIX}/auth/account`);
+export const callRefreshToken = () =>
+    axios.get<IBackendRes<IAccount>>(`${API_PREFIX}/auth/refresh`);
+export const callLogout = () =>
+    axios.post<IBackendRes<string>>(`${API_PREFIX}/auth/logout`);
 export const callUpdateMyProfile = (value: { name?: string; phone?: string; address?: string; age?: number; gender?: string; currentPassword?: string; newPassword?: string }) => {
     const id = getCurrentUserId();
     if (!id) throw new Error('Không xác định được tài khoản người dùng.');
@@ -100,6 +105,8 @@ export const callFetchMyTeachingClassrooms = async (teacherId?: string) => {
 export const callCreateEnrollment = (value: Omit<IEnrollment, '_id'>) => create<IEnrollment>('enrollments', value);
 export const callRegisterForCourse = (value: Omit<IEnrollment, '_id'>) => axios.post<IBackendRes<IEnrollment>>(`${API_PREFIX}/enrollments/register`, value);
 export const callUpdateEnrollment = (value: Partial<IEnrollment>, id: string) => update<IEnrollment>('enrollments', id, value);
+export const callCancelMyEnrollment = (id: string) =>
+    axios.patch<IBackendRes<{ matchedCount: number; modifiedCount: number }>>(`${API_PREFIX}/enrollments/me/${id}/cancel`);
 export const callDeleteEnrollment = (id: string) => remove<IEnrollment>('enrollments', id);
 export const callFetchEnrollment = (query = '') => list<IEnrollment>('enrollments', query);
 export const callFetchEnrollmentById = (id: string) => findById<IEnrollment>('enrollments', id);

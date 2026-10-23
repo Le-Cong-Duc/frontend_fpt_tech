@@ -263,7 +263,7 @@ const RegisterPage = () => {
                                 'Đang khởi tạo tài khoản...'
                             ) : (
                                 <>
-                                    <RocketOutlined /> HOÀN TẤT ĐĂNG KÝ HỌC VIÊN
+                                    <RocketOutlined /> HOÀN TẤT ĐĂNG KÝ
                                 </>
                             )}
                         </button>

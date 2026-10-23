@@ -6,10 +6,12 @@ import {
     Descriptions,
     Input,
     Modal,
+    Popconfirm,
     Row,
     Select,
     Space,
     Table,
+    message,
 } from 'antd';
 import {
     CheckCircleOutlined,
@@ -17,8 +19,10 @@ import {
     EyeOutlined,
     FileTextOutlined,
     SearchOutlined,
+    StopOutlined,
 } from '@ant-design/icons';
 import { useAppSelector } from '@/redux/hooks';
+import { callCancelMyEnrollment } from '@/config/api';
 import {
     StudentEmpty,
     StudentState,
@@ -58,7 +62,9 @@ const StudentInvoices = () => {
 
     // Thống kê nhanh học phí
     const totalAmount = useMemo(() => {
-        return data.invoices.reduce((sum, inv) => sum + (inv.final_amount || inv.amount || 0), 0);
+        return data.invoices
+            .filter(invoice => invoice.status?.toUpperCase() !== 'CANCELLED')
+            .reduce((sum, inv) => sum + (inv.final_amount || inv.amount || 0), 0);
     }, [data.invoices]);
 
     const paidAmount = useMemo(() => {
@@ -73,6 +79,28 @@ const StudentInvoices = () => {
     const handleOpenPayment = (invoice: IPortalInvoice) => {
         setPayingInvoice(invoice);
         setPaymentModalOpen(true);
+    };
+
+    const handleCancelEnrollment = async (invoice: IPortalInvoice) => {
+        const enrollmentId = typeof invoice.enrollment_id === 'string'
+            ? invoice.enrollment_id
+            : invoice.enrollment_id?._id;
+        if (!enrollmentId) {
+            message.error('Không tìm thấy thông tin đăng ký cần hủy.');
+            return;
+        }
+
+        try {
+            const response = await callCancelMyEnrollment(enrollmentId);
+            if (!response?.data) {
+                message.error(response?.message || 'Không thể hủy đăng ký.');
+                return;
+            }
+            message.success('Đã hủy đăng ký và hóa đơn liên quan.');
+            await data.refresh();
+        } catch (error) {
+            message.error((error as { message?: string })?.message || 'Không thể hủy đăng ký. Vui lòng thử lại.');
+        }
     };
 
     return (
@@ -134,6 +162,7 @@ const StudentInvoices = () => {
                                     { label: 'Chờ thanh toán (WAITING_PAYMENT)', value: 'WAITING_PAYMENT' },
                                     { label: 'Chờ xác nhận', value: 'WAITING_CONFIRMATION' },
                                     { label: 'Quá hạn (OVERDUE)', value: 'OVERDUE' },
+                                    { label: 'Đã hủy (CANCELLED)', value: 'CANCELLED' },
                                 ]}
                             />
                         </div>
@@ -202,10 +231,15 @@ const StudentInvoices = () => {
                                 {
                                     title: 'Thao tác',
                                     fixed: 'right',
+                                    width: 230,
                                     render: (_: unknown, item) => {
                                         const status = item.status?.toUpperCase();
                                         const isPaid = status === 'PAID';
-                                        const isPending = status === 'WAITING_CONFIRMATION';
+                                        const cannotCancel = ['PAID', 'PARTIAL', 'WAITING_CONFIRMATION', 'CANCELLED'].includes(status || '');
+                                        const enrollmentStatus = typeof item.enrollment_id === 'object'
+                                            ? item.enrollment_id?.status?.toUpperCase()
+                                            : undefined;
+                                        const canCancel = !cannotCancel && !['COMPLETED', 'CANCELLED'].includes(enrollmentStatus || '');
                                         return (
                                             <Space>
                                                 <Button
@@ -215,15 +249,29 @@ const StudentInvoices = () => {
                                                 >
                                                     Chi tiết
                                                 </Button>
-                                                {!isPaid && !isPending && (
+                                                {!isPaid && status !== 'WAITING_CONFIRMATION' && status !== 'CANCELLED' && (
                                                     <Button
                                                         size="small"
                                                         type="primary"
                                                         icon={<CreditCardOutlined />}
                                                         onClick={() => handleOpenPayment(item)}
                                                     >
-                                                        Thanh toán
+                                                        Thanh toán ngay
                                                     </Button>
+                                                )}
+                                                {canCancel && (
+                                                    <Popconfirm
+                                                        title="Hủy đăng ký khóa học?"
+                                                        description="Hóa đơn sẽ được hủy và bạn sẽ không còn giữ chỗ trong lớp."
+                                                        okText="Hủy đăng ký"
+                                                        cancelText="Quay lại"
+                                                        okButtonProps={{ danger: true }}
+                                                        onConfirm={() => handleCancelEnrollment(item)}
+                                                    >
+                                                        <Button size="small" danger icon={<StopOutlined />}>
+                                                            Hủy đăng ký
+                                                        </Button>
+                                                    </Popconfirm>
                                                 )}
                                             </Space>
                                         );
@@ -304,6 +352,10 @@ const StudentInvoices = () => {
                     setPaymentModalOpen(false);
                     setPayingInvoice(null);
                     void data.refresh();
+                }}
+                onPayLater={() => {
+                    setPaymentModalOpen(false);
+                    setPayingInvoice(null);
                 }}
             />
         </main>

@@ -3,7 +3,6 @@ import { Button, Card, Col, Descriptions, Input, Modal, Row, Select, Space, Tabl
 import {
     BookOutlined,
     CalendarOutlined,
-    CheckCircleOutlined,
     CompassOutlined,
     PlusCircleOutlined,
     SearchOutlined,
@@ -12,19 +11,18 @@ import {
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAppSelector } from '@/redux/hooks';
-import { callCreateEnrollment, callCreateInvoice } from '@/config/api';
+import { callFetchMyInvoices, callRegisterForCourse } from '@/config/api';
 import {
     StudentEmpty,
     StudentState,
     enrollmentCourse,
     money,
-    saveLocalEnrollment,
-    saveLocalInvoice,
     statusTag,
     useStudentData,
 } from './student.shared';
-import type { IClassroomWithDetails, ICourse, IPortalEnrollment } from '@/types/backend';
+import type { IClassroomWithDetails, ICourse, IPortalInvoice } from '@/types/backend';
 import styles from '@/styles/client.module.scss';
+import PaymentRequestModal from '@/components/client/PaymentRequestModal';
 
 const StudentCourses = () => {
     const navigate = useNavigate();
@@ -36,6 +34,7 @@ const StudentCourses = () => {
     const [status, setStatus] = useState<string>();
     const [selectedCourse, setSelectedCourse] = useState<ICourse | null>(null);
     const [enrolling, setEnrolling] = useState(false);
+    const [paymentInvoice, setPaymentInvoice] = useState<IPortalInvoice | null>(null);
 
     // Lọc các khóa học học viên đã đăng ký
     const myCourses = useMemo(
@@ -78,7 +77,7 @@ const StudentCourses = () => {
         );
     }, [data.enrollments]);
 
-    // Đăng ký tham gia một lớp học & tự động tạo hóa đơn học phí
+    // Đăng ký qua endpoint tự phục vụ để backend tạo enrollment và hóa đơn.
     const handleEnrollClass = async (classroom: IClassroomWithDetails) => {
         if (!user._id) {
             return message.error('Không tìm thấy thông tin tài khoản học viên.');
@@ -87,64 +86,42 @@ const StudentCourses = () => {
 
         setEnrolling(true);
         try {
-            const res = await callCreateEnrollment({
-                student_id: user._id as any,
-                class_id: classroom._id as any,
-                register_date: new Date().toISOString() as any,
-                status: 'STUDYING' as any,
-            });
-
-            const enrollmentId = res?.data?._id || `enr_${Date.now()}`;
-            const coursePrice = Number(
-                (typeof classroom.course_id === 'object' ? classroom.course_id?.price : selectedCourse?.price) || 0
-            );
-
-            // Lưu local enrollment cache để tức thì hiển thị trên UI
-            const newEnrollment: IPortalEnrollment = {
-                _id: enrollmentId,
-                student_id: { _id: user._id, name: user.name, email: user.email },
-                class_id: classroom,
+            const response = await callRegisterForCourse({
+                student_id: user._id,
+                class_id: classroom._id,
                 register_date: new Date().toISOString(),
-                status: 'STUDYING',
-                createdAt: new Date().toISOString(),
-            };
-            saveLocalEnrollment(user._id, newEnrollment);
-
-            // Tự động tạo hóa đơn học phí cho lớp học vừa đăng ký
-            let invoiceId = `inv_${enrollmentId}`;
-            try {
-                const invRes = await callCreateInvoice({
-                    enrollment_id: enrollmentId as any,
-                    amount: coursePrice,
-                    discount_amount: 0,
-                    final_amount: coursePrice,
-                    status: 'UNPAID',
-                });
-                if (invRes?.data?._id) {
-                    invoiceId = invRes.data._id;
-                }
-            } catch {
-                // Tiếp tục lưu local invoice nếu backend permission từ chối
-            }
-
-            saveLocalInvoice(user._id, {
-                _id: invoiceId,
-                enrollment_id: newEnrollment,
-                amount: coursePrice,
-                discount_amount: 0,
-                final_amount: coursePrice,
-                status: 'UNPAID',
-                createdAt: new Date().toISOString(),
+                status: 'WAITING_PAYMENT',
             });
-
-            message.success(
-                `Đăng ký thành công lớp học: ${classroom.class_name}! Hóa đơn học phí đã được tạo tự động, bạn có thể kiểm tra tại mục Hóa đơn.`
-            );
+            const enrollmentId = response?.data?._id;
+            if (!enrollmentId) throw new Error(response?.message || 'Không nhận được thông tin đăng ký từ máy chủ.');
             setSelectedCourse(null);
             await data.refresh();
             setActiveTab('my-courses');
-        } catch {
-            message.error('Đã xảy ra lỗi khi đăng ký. Vui lòng thử lại.');
+            let invoice: IPortalInvoice | undefined;
+            try {
+                const invoiceResponse = await callFetchMyInvoices();
+                const invoices = Array.isArray(invoiceResponse.data) ? invoiceResponse.data : [];
+                invoice = invoices.find(item => {
+                    const invoiceEnrollmentId = typeof item.enrollment_id === 'string'
+                        ? item.enrollment_id
+                        : item.enrollment_id?._id;
+                    return invoiceEnrollmentId === enrollmentId;
+                });
+            } catch {
+                message.warning('Đăng ký thành công nhưng chưa tải được hóa đơn. Bạn có thể xem lại tại mục Hóa đơn.');
+                navigate('/client/student/invoices');
+                return;
+            }
+            if (!invoice) {
+                message.warning('Đăng ký thành công nhưng chưa tìm thấy hóa đơn. Bạn có thể thanh toán sau tại mục Hóa đơn.');
+                navigate('/client/student/invoices');
+                return;
+            }
+            setPaymentInvoice(invoice);
+            message.success(`Đã đăng ký lớp ${classroom.class_name}. Vui lòng thanh toán hoặc chọn thanh toán sau.`);
+        } catch (error) {
+            const apiMessage = (error as { message?: string })?.message;
+            message.error(apiMessage || 'Không thể hoàn tất đăng ký. Vui lòng thử lại.');
         } finally {
             setEnrolling(false);
         }
@@ -435,6 +412,19 @@ const StudentCourses = () => {
                     </>
                 )}
             </Modal>
+            <PaymentRequestModal
+                invoice={paymentInvoice}
+                userName={user.name}
+                onClose={() => setPaymentInvoice(null)}
+                onPayLater={() => {
+                    setPaymentInvoice(null);
+                    navigate('/client/student/invoices');
+                }}
+                onRequested={() => {
+                    setPaymentInvoice(null);
+                    navigate('/client/student/invoices');
+                }}
+            />
         </main>
     );
 };

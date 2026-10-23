@@ -174,7 +174,7 @@ export const useAccountantData = () => {
         setError('');
         try {
             const [invoiceResponse, paymentResponse, enrollmentResponse, userResponse, courseResponse, classroomResponse] = await Promise.all([
-                callFetchInvoice('current=1&pageSize=1000&populate=enrollment_id'),
+                callFetchInvoice('current=1&pageSize=1000&sort=-createdAt&populate=enrollment_id'),
                 callFetchPayment('current=1&pageSize=1000&populate=invoice_id'),
                 callFetchEnrollment('current=1&pageSize=1000&populate=student_id,class_id'),
                 callFetchUser('current=1&pageSize=1000'),
@@ -183,7 +183,11 @@ export const useAccountantData = () => {
             ]);
 
             setData({
-                invoices: toArray<AccountantInvoice>(invoiceResponse),
+                invoices: toArray<AccountantInvoice>(invoiceResponse).sort((a, b) => {
+                    const dateA = Date.parse(a.createdAt || '') || 0;
+                    const dateB = Date.parse(b.createdAt || '') || 0;
+                    return dateB - dateA;
+                }),
                 payments: toArray<AccountantPayment>(paymentResponse),
                 enrollments: toArray<Omit<IEnrollment, 'student_id'> & { student_id: string | IUserSummary }>(enrollmentResponse),
                 users: toArray<IUser>(userResponse),

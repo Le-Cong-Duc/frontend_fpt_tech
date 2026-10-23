@@ -230,6 +230,10 @@ const CourseCheckout = () => {
                 invoice={paymentModalOpen ? paymentInvoice : null}
                 userName={user.name}
                 onClose={() => setPaymentModalOpen(false)}
+                onPayLater={() => {
+                    setPaymentModalOpen(false);
+                    navigate('/client/student/invoices');
+                }}
                 onRequested={() => {
                     setPaymentModalOpen(false);
                     navigate('/client/student/invoices');
