@@ -17,10 +17,14 @@ const StudentSchedule = () => {
     const data = useStudentData(user._id);
     const [search, setSearch] = useState('');
     const [room, setRoom] = useState<string>();
+    const activeEnrollments = useMemo(
+        () => data.enrollments.filter(item => item.status?.toUpperCase() !== 'CANCELLED'),
+        [data.enrollments]
+    );
 
     const items = useMemo(
         () =>
-            data.enrollments.filter(item => {
+            activeEnrollments.filter(item => {
                 const courseName = enrollmentCourse(item);
                 const className = item.class_id?.class_name || '';
                 const teacherName = item.class_id?.teacher_id?.name || '';
@@ -30,12 +34,12 @@ const StudentSchedule = () => {
                 const matchRoom = !room || item.class_id?.room === room;
                 return matchSearch && matchRoom;
             }),
-        [data.enrollments, room, search]
+        [activeEnrollments, room, search]
     );
 
     const availableRooms = useMemo(() => {
-        return [...new Set(data.enrollments.map(item => item.class_id?.room).filter(Boolean))];
-    }, [data.enrollments]);
+        return [...new Set(activeEnrollments.map(item => item.class_id?.room).filter(Boolean))];
+    }, [activeEnrollments]);
 
     return (
         <main className={`${styles.container} ${styles['student-page']}`}>
@@ -48,7 +52,7 @@ const StudentSchedule = () => {
             </section>
 
             <StudentState loading={data.loading} error={data.error}>
-                {!data.enrollments.length ? (
+                {!activeEnrollments.length ? (
                     <StudentEmpty description="Bạn chưa đăng ký lớp học nào để hiển thị thời khóa biểu." />
                 ) : (
                     <>

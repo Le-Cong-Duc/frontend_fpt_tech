@@ -28,7 +28,6 @@ import Loading from './components/share/loading';
 import NotPermitted from './components/share/protected-route.ts/not-permitted';
 import { getDefaultRouteForRole, getPortalRole, isAccountantRole, isBackofficeRole } from './config/portal';
 import AccountantDashboard from './pages/client/accountant/AccountantDashboard';
-import AccountantTuition from './pages/client/accountant/AccountantTuition';
 import AccountantInvoices from './pages/client/accountant/AccountantInvoices';
 import AccountantPayments from './pages/client/accountant/AccountantPayments';
 import AccountantRevenue from './pages/client/accountant/AccountantRevenue';
@@ -194,7 +193,6 @@ export default function App() {
             errorElement: <NotFound />,
             children: [
                 { index: true, element: <AccountantRoute><AccountantDashboard /></AccountantRoute> },
-                { path: 'tuition', element: <AccountantRoute><AccountantTuition /></AccountantRoute> },
                 { path: 'invoices', element: <AccountantRoute><AccountantInvoices /></AccountantRoute> },
                 { path: 'payments', element: <AccountantRoute><AccountantPayments /></AccountantRoute> },
                 { path: 'revenue', element: <AccountantRoute><AccountantRevenue /></AccountantRoute> },

@@ -11,6 +11,7 @@ import {
     Select,
     Space,
     Table,
+    Tooltip,
     message,
 } from 'antd';
 import {
@@ -171,7 +172,7 @@ const StudentInvoices = () => {
                             rowKey="_id"
                             dataSource={invoices}
                             pagination={{ pageSize: 8, showTotal: total => `Tổng số ${total} hóa đơn` }}
-                            scroll={{ x: 880 }}
+                            scroll={{ x: 1110 }}
                             columns={[
                                 {
                                     title: 'STT',
@@ -180,40 +181,53 @@ const StudentInvoices = () => {
                                 },
                                 {
                                     title: 'Mã hóa đơn',
+                                    width: 125,
                                     render: (_: unknown, item) => (
-                                        <span style={{ fontFamily: 'monospace', fontWeight: 600 }}>
-                                            {item._id?.slice(-8).toUpperCase() || '—'}
+                                        <span className={styles['invoice-code']}>
+                                            INV-{item._id?.slice(-8).toUpperCase() || '—'}
                                         </span>
                                     ),
                                 },
                                 {
                                     title: 'Khóa học',
+                                    width: 190,
                                     render: (_: unknown, item) => (
-                                        <b style={{ color: '#1677ff' }}>{invoiceCourse(item)}</b>
+                                        <span style={{ color: '#145da0', fontWeight: 600, lineHeight: 1.45 }}>
+                                            {invoiceCourse(item)}
+                                        </span>
                                     ),
                                 },
                                 {
                                     title: 'Lớp học',
+                                    width: 140,
                                     render: (_: unknown, item) =>
-                                        item.enrollment_id?.class_id?.class_name || 'Chưa cập nhật',
+                                        <span style={{ color: '#526273' }}>
+                                            {item.enrollment_id?.class_id?.class_name || 'Chưa cập nhật'}
+                                        </span>,
                                 },
                                 {
                                     title: 'Số tiền gốc',
-                                    render: (_: unknown, item) => money(item.amount),
+                                    align: 'right',
+                                    width: 130,
+                                    render: (_: unknown, item) => <span>{money(item.amount)}</span>,
                                 },
                                 {
                                     title: 'Giảm giá',
+                                    align: 'right',
+                                    width: 110,
                                     render: (_: unknown, item) =>
                                         item.discount_amount ? (
-                                            <span style={{ color: '#52c41a' }}>-{money(item.discount_amount)}</span>
+                                            <span style={{ color: '#25805d' }}>-{money(item.discount_amount)}</span>
                                         ) : (
                                             '—'
                                         ),
                                 },
                                 {
                                     title: 'Thành tiền',
+                                    align: 'right',
+                                    width: 140,
                                     render: (_: unknown, item) => (
-                                        <b style={{ color: '#d4380d', fontSize: 14 }}>
+                                        <b style={{ color: '#c2410c', whiteSpace: 'nowrap' }}>
                                             {money(item.final_amount || item.amount)}
                                         </b>
                                     ),
@@ -221,27 +235,28 @@ const StudentInvoices = () => {
                                 {
                                     title: 'Ngày tạo',
                                     dataIndex: 'createdAt',
+                                    width: 115,
                                     render: (val?: string) => dateText(val),
                                 },
                                 {
                                     title: 'Trạng thái',
                                     dataIndex: 'status',
+                                    width: 140,
                                     render: statusTag,
                                 },
                                 {
                                     title: 'Thao tác',
                                     fixed: 'right',
-                                    width: 230,
+                                    width: 170,
                                     render: (_: unknown, item) => {
                                         const status = item.status?.toUpperCase();
-                                        const isPaid = status === 'PAID';
                                         const cannotCancel = ['PAID', 'PARTIAL', 'WAITING_CONFIRMATION', 'CANCELLED'].includes(status || '');
                                         const enrollmentStatus = typeof item.enrollment_id === 'object'
                                             ? item.enrollment_id?.status?.toUpperCase()
                                             : undefined;
                                         const canCancel = !cannotCancel && !['COMPLETED', 'CANCELLED'].includes(enrollmentStatus || '');
                                         return (
-                                            <Space>
+                                            <Space size={6}>
                                                 <Button
                                                     size="small"
                                                     icon={<EyeOutlined />}
@@ -249,15 +264,17 @@ const StudentInvoices = () => {
                                                 >
                                                     Chi tiết
                                                 </Button>
-                                                {!isPaid && status !== 'WAITING_CONFIRMATION' && status !== 'CANCELLED' && (
-                                                    <Button
-                                                        size="small"
-                                                        type="primary"
-                                                        icon={<CreditCardOutlined />}
-                                                        onClick={() => handleOpenPayment(item)}
-                                                    >
-                                                        Thanh toán ngay
-                                                    </Button>
+                                                {!['PAID', 'PARTIAL', 'WAITING_CONFIRMATION', 'CANCELLED'].includes(status || '') && (
+                                                    <Tooltip title="Thanh toán ngay">
+                                                        <Button
+                                                            size="small"
+                                                            type="primary"
+                                                            shape="circle"
+                                                            aria-label="Thanh toán ngay"
+                                                            icon={<CreditCardOutlined />}
+                                                            onClick={() => handleOpenPayment(item)}
+                                                        />
+                                                    </Tooltip>
                                                 )}
                                                 {canCancel && (
                                                     <Popconfirm
@@ -268,9 +285,15 @@ const StudentInvoices = () => {
                                                         okButtonProps={{ danger: true }}
                                                         onConfirm={() => handleCancelEnrollment(item)}
                                                     >
-                                                        <Button size="small" danger icon={<StopOutlined />}>
-                                                            Hủy đăng ký
-                                                        </Button>
+                                                        <Tooltip title="Hủy đăng ký">
+                                                            <Button
+                                                                size="small"
+                                                                danger
+                                                                shape="circle"
+                                                                aria-label="Hủy đăng ký"
+                                                                icon={<StopOutlined />}
+                                                            />
+                                                        </Tooltip>
                                                     </Popconfirm>
                                                 )}
                                             </Space>

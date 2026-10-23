@@ -19,7 +19,7 @@ const CourseDetail = () => {
     const handleRegistration = () => {
         if (accountLoading) return;
         if (!isAuthenticated) {
-            message.warning('Bạn cần đăng nhập để tiếp tục. Tài khoản học viên hoặc NORMAL USER mới được đăng ký khóa học.');
+            message.warning('Bạn cần đăng nhập để tiếp tục.');
             navigate(`/login?callback=${encodeURIComponent(`/client/courses/${id}/checkout`)}`);
             return;
         }

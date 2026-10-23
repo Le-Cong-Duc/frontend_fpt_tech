@@ -24,7 +24,7 @@ const StudentClasses = () => {
 
     const classes = useMemo(() => {
         return data.enrollments.filter(enrollment => {
-            if (!enrollment.class_id) return false;
+            if (!enrollment.class_id || enrollment.status?.toUpperCase() === 'CANCELLED') return false;
             const className = enrollment.class_id?.class_name || '';
             const courseName = enrollmentCourse(enrollment);
             const teacherName = enrollment.class_id?.teacher_id?.name || '';

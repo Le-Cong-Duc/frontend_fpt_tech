@@ -33,7 +33,7 @@ const StudentCourses = () => {
     const [search, setSearch] = useState('');
     const [status, setStatus] = useState<string>();
     const [selectedCourse, setSelectedCourse] = useState<ICourse | null>(null);
-    const [enrolling, setEnrolling] = useState(false);
+    const [registeringClassId, setRegisteringClassId] = useState<string | null>(null);
     const [paymentInvoice, setPaymentInvoice] = useState<IPortalInvoice | null>(null);
 
     // Lọc các khóa học học viên đã đăng ký
@@ -73,7 +73,10 @@ const StudentCourses = () => {
     // Các lớp học viên đã tham gia
     const enrolledClassIds = useMemo(() => {
         return new Set(
-            data.enrollments.map(e => (typeof e.class_id === 'object' ? e.class_id?._id : e.class_id)).filter(Boolean)
+            data.enrollments
+                .filter(e => e.status?.toUpperCase() !== 'CANCELLED')
+                .map(e => (typeof e.class_id === 'object' ? e.class_id?._id : e.class_id))
+                .filter(Boolean)
         );
     }, [data.enrollments]);
 
@@ -84,7 +87,7 @@ const StudentCourses = () => {
         }
         if (!classroom._id) return;
 
-        setEnrolling(true);
+        setRegisteringClassId(classroom._id);
         try {
             const response = await callRegisterForCourse({
                 student_id: user._id,
@@ -123,7 +126,7 @@ const StudentCourses = () => {
             const apiMessage = (error as { message?: string })?.message;
             message.error(apiMessage || 'Không thể hoàn tất đăng ký. Vui lòng thử lại.');
         } finally {
-            setEnrolling(false);
+            setRegisteringClassId(null);
         }
     };
 
@@ -398,7 +401,8 @@ const StudentCourses = () => {
                                                 <Button
                                                     size="small"
                                                     type="primary"
-                                                    loading={enrolling}
+                                                    loading={registeringClassId === room._id}
+                                                    disabled={registeringClassId !== null}
                                                     onClick={() => handleEnrollClass(room)}
                                                 >
                                                     Đăng ký lớp
