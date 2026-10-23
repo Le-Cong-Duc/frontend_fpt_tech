@@ -116,7 +116,7 @@ export const clientMenu: ClientMenuItem[] = [
     { key: '/client/manager/chat', label: 'Tin nhắn nội bộ', roles: ['MANAGER'], icon: <MessageOutlined /> },
     { key: '/client/manager/profile', label: 'Thông tin cá nhân', roles: ['MANAGER'], icon: <UserOutlined /> },
     { key: '/client/accountant', label: 'Dashboard', roles: ['ACCOUNTANT'], icon: <HomeOutlined /> },
-    { key: '/client/accountant/tuition', label: 'Học phí', roles: ['ACCOUNTANT'], icon: <FileTextOutlined /> },
+    // { key: '/client/accountant/tuition', label: 'Học phí', roles: ['ACCOUNTANT'], icon: <FileTextOutlined /> },
     { key: '/client/accountant/invoices', label: 'Hóa đơn', roles: ['ACCOUNTANT'], icon: <FileTextOutlined /> },
     { key: '/client/accountant/payments', label: 'Thanh toán', roles: ['ACCOUNTANT'], icon: <CreditCardOutlined /> },
     { key: '/client/accountant/revenue', label: 'Doanh thu', roles: ['ACCOUNTANT'], icon: <RiseOutlined /> },
